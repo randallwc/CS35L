@@ -1,0 +1,413 @@
+William Randall
+lab.txt
+
+/////   part 1  /////
+
+First I downloaded simpgmp.c
+
+$ wget https://web.cs.ucla.edu/classes/spring20/cs35L/assign/simpgmp.c
+
+Then I compiled it with the flags '-lgmp'
+
+$ gcc -o simpgmp -lgmp simpgmp.c
+
+/////   part 2  /////
+
+Then I used 'simpgmp' to calculate 
+
+$ ./simpgmp 24
+
+16777216
+
+To get 2**(2**24) I stored the value in var
+
+$ var=$(./simpgmp 16777216)
+
+Then I checked the number of digits in var
+
+$ echo "${#var}"
+5050446
+
+Then I checked the begining 4 digits of var
+
+$ echo "${var:0:4}"
+1818
+
+Then I checked the last 4 digits of var
+
+$ echo "${var: -4}"
+7536
+
+/////	part 3	/////
+
+$ ldd simpgmp
+
+===output===
+linux-vdso.so.1 =>  (0x00007ffd06d0b000)
+libgmp.so.10 => /lib64/libgmp.so.10 (0x00007f6ce30cf000)
+libc.so.6 => /lib64/libc.so.6 (0x00007f6ce2d01000)
+/lib64/ld-linux-x86-64.so.2 (0x00007f6ce3347000)
+===end===
+
+This shows that simpgmp uses the library 'vdso' which is 'virtual dynamic shared object',
+gmp arbitrary precision arithmetic library,
+c standard library,
+and x86-64 Linux dynamic linker.
+
+/////   part 4  /////
+
+$ strace ./simpgmp 24
+
+===output===
+...
+access("/etc/ld.so.preload", R_OK)      = -1 ENOENT (No such file or directory)
+open("/etc/ld.so.cache", O_RDONLY|O_CLOEXEC) = 3
+fstat(3, {st_mode=S_IFREG|0644, st_size=150053, ...}) = 0
+mmap(NULL, 150053, PROT_READ, MAP_PRIVATE, 3, 0) = 0x7fbdb3931000
+close(3)                                = 0
+open("/lib64/libgmp.so.10", O_RDONLY|O_CLOEXEC) = 3
+read(3, "\177ELF\2\1\1\0\0\0\0\0\0\0\0\0\3\0>\0\1\0\0\0\200\304\0\0\0\0\0\0"..., 832) = 832
+fstat(3, {st_mode=S_IFREG|0755, st_size=495720, ...}) = 0
+mmap(NULL, 2584736, PROT_READ|PROT_EXEC, MAP_PRIVATE|MAP_DENYWRITE, 3, 0) = 0x7fbdb34be000
+mprotect(0x7fbdb3534000, 2093056, PROT_NONE) = 0
+mmap(0x7fbdb3733000, 12288, PROT_READ|PROT_WRITE, MAP_PRIVATE|MAP_FIXED|MAP_DENYWRITE, 3, 0x75000) = 0x7fbdb3733000
+close(3)                                = 0
+open("/lib64/libc.so.6", O_RDONLY|O_CLOEXEC) = 3
+read(3, "\177ELF\2\1\1\3\0\0\0\0\0\0\0\0\3\0>\0\1\0\0\0P&\2\0\0\0\0\0"..., 832) = 832
+fstat(3, {st_mode=S_IFREG|0755, st_size=2156072, ...}) = 0
+mmap(NULL, 3985888, PROT_READ|PROT_EXEC, MAP_PRIVATE|MAP_DENYWRITE, 3, 0) = 0x7fbdb30f0000
+mprotect(0x7fbdb32b3000, 2097152, PROT_NONE) = 0
+mmap(0x7fbdb34b3000, 24576, PROT_READ|PROT_WRITE, MAP_PRIVATE|MAP_FIXED|MAP_DENYWRITE, 3, 0x1c3000) = 0x7fbdb34b3000
+mmap(0x7fbdb34b9000, 16864, PROT_READ|PROT_WRITE, MAP_PRIVATE|MAP_FIXED|MAP_ANONYMOUS, -1, 0) = 0x7fbdb34b9000
+close(3)                                = 0
+...
+===end===
+
+These are the commands that pertain to dynamic linking.
+By using access it checks if it has the correct permissions and
+then it attempts to open a ld.so.preload which is a list of
+ELF shared libraries that the user specified.
+Then it goes through and opens the linked libraries and 
+then reads them and uses fstat() to get information about them.
+Then it will map them to memory with mmap.
+Then the program can execute code in the libraries, but they remain
+protected by use of the mprotect function which keeps the libraries
+permissions. Finally it closes the libraries with close.
+
+/////   part 5  /////
+
+$ ls /usr/bin | awk '(NR-805167986)%251 == 0'
+
+===output===
+base64
+deallocvt
+ghostscript
+info
+libpng-config
+nl-class-list
+pbmtodjvurle
+policyeditor
+rpmdev-sha256
+stap
+winpopup-install
+===end===
+
+/////   part 6  /////
+
+I CDed into /usr/bin dir and then ran the following commands.
+
+$ ldd base64
+
+	linux-vdso.so.1 =>  (0x00007ffc7ad23000)
+	libc.so.6 => /lib64/libc.so.6 (0x00007f5765b29000)
+	/lib64/ld-linux-x86-64.so.2 (0x00007f5765ef7000)
+
+$ ldd deallocvt
+
+	linux-vdso.so.1 =>  (0x00007ffdaf963000)
+	libc.so.6 => /lib64/libc.so.6 (0x00007fea08243000)
+	/lib64/ld-linux-x86-64.so.2 (0x00007fea08611000)
+
+$ ldd ghostscript
+
+	linux-vdso.so.1 =>  (0x00007ffec1742000)
+	libgs.so.9 => /lib64/libgs.so.9 (0x00007fe0c630a000)
+	libc.so.6 => /lib64/libc.so.6 (0x00007fe0c5f3c000)
+	libtiff.so.5 => /lib64/libtiff.so.5 (0x00007fe0c5cc8000)
+	libcupsimage.so.2 => /lib64/libcupsimage.so.2 (0x00007fe0c5abf000)
+	libcups.so.2 => /lib64/libcups.so.2 (0x00007fe0c5856000)
+	libgssapi_krb5.so.2 => /lib64/libgssapi_krb5.so.2 (0x00007fe0c5609000)
+	libkrb5.so.3 => /lib64/libkrb5.so.3 (0x00007fe0c5320000)
+	libk5crypto.so.3 => /lib64/libk5crypto.so.3 (0x00007fe0c50ed000)
+	libcom_err.so.2 => /lib64/libcom_err.so.2 (0x00007fe0c4ee9000)
+	libpthread.so.0 => /lib64/libpthread.so.0 (0x00007fe0c4ccd000)
+	libm.so.6 => /lib64/libm.so.6 (0x00007fe0c49cb000)
+	libcrypt.so.1 => /lib64/libcrypt.so.1 (0x00007fe0c4794000)
+	libpng15.so.15 => /lib64/libpng15.so.15 (0x00007fe0c4569000)
+	libjpeg.so.62 => /lib64/libjpeg.so.62 (0x00007fe0c4314000)
+	libz.so.1 => /lib64/libz.so.1 (0x00007fe0c40fe000)
+	liblcms2.so.2 => /lib64/liblcms2.so.2 (0x00007fe0c3ea4000)
+	libdl.so.2 => /lib64/libdl.so.2 (0x00007fe0c3ca0000)
+	libidn.so.11 => /lib64/libidn.so.11 (0x00007fe0c3a6d000)
+	libpaper.so.1 => /lib64/libpaper.so.1 (0x00007fe0c3869000)
+	libfontconfig.so.1 => /lib64/libfontconfig.so.1 (0x00007fe0c3627000)
+	libfreetype.so.6 => /lib64/libfreetype.so.6 (0x00007fe0c3368000)
+	libopenjp2.so.7 => /lib64/libopenjp2.so.7 (0x00007fe0c3115000)
+	libgcc_s.so.1 => /lib64/libgcc_s.so.1 (0x00007fe0c2eff000)
+	/lib64/ld-linux-x86-64.so.2 (0x00007fe0c76b6000)
+	libjbig.so.2.0 => /lib64/libjbig.so.2.0 (0x00007fe0c2cf3000)
+	libssl.so.10 => /lib64/libssl.so.10 (0x00007fe0c2a81000)
+	libcrypto.so.10 => /lib64/libcrypto.so.10 (0x00007fe0c261e000)
+	libavahi-common.so.3 => /lib64/libavahi-common.so.3 (0x00007fe0c2411000)
+	libavahi-client.so.3 => /lib64/libavahi-client.so.3 (0x00007fe0c2200000)
+	libkrb5support.so.0 => /lib64/libkrb5support.so.0 (0x00007fe0c1ff0000)
+	libkeyutils.so.1 => /lib64/libkeyutils.so.1 (0x00007fe0c1dec000)
+	libresolv.so.2 => /lib64/libresolv.so.2 (0x00007fe0c1bd3000)
+	libfreebl3.so => /lib64/libfreebl3.so (0x00007fe0c19d0000)
+	libexpat.so.1 => /lib64/libexpat.so.1 (0x00007fe0c17a6000)
+	libuuid.so.1 => /lib64/libuuid.so.1 (0x00007fe0c15a1000)
+	libbz2.so.1 => /lib64/libbz2.so.1 (0x00007fe0c1391000)
+	libdbus-1.so.3 => /lib64/libdbus-1.so.3 (0x00007fe0c1141000)
+	libselinux.so.1 => /lib64/libselinux.so.1 (0x00007fe0c0f1a000)
+	libsystemd.so.0 => /lib64/libsystemd.so.0 (0x00007fe0c0ce9000)
+	libpcre.so.1 => /lib64/libpcre.so.1 (0x00007fe0c0a87000)
+	libcap.so.2 => /lib64/libcap.so.2 (0x00007fe0c0882000)
+	librt.so.1 => /lib64/librt.so.1 (0x00007fe0c067a000)
+	liblzma.so.5 => /lib64/liblzma.so.5 (0x00007fe0c0454000)
+	liblz4.so.1 => /lib64/liblz4.so.1 (0x00007fe0c023f000)
+	libgcrypt.so.11 => /lib64/libgcrypt.so.11 (0x00007fe0bffbe000)
+	libgpg-error.so.0 => /lib64/libgpg-error.so.0 (0x00007fe0bfdb9000)
+	libdw.so.1 => /lib64/libdw.so.1 (0x00007fe0bfb68000)
+	libattr.so.1 => /lib64/libattr.so.1 (0x00007fe0bf963000)
+	libelf.so.1 => /lib64/libelf.so.1 (0x00007fe0bf74b000)
+
+$ ldd info
+
+	linux-vdso.so.1 =>  (0x00007ffc1d7fd000)
+	libtinfo.so.5 => /lib64/libtinfo.so.5 (0x00007fbc16f32000)
+	libc.so.6 => /lib64/libc.so.6 (0x00007fbc16b64000)
+	/lib64/ld-linux-x86-64.so.2 (0x00007fbc1715c000)
+
+$ ldd libpng-config
+
+not a dynamic executable
+
+	To find more information I ran these commands	
+
+	$ file libpng-config
+	
+	libpng-config: symbolic link to `libpng15-config'
+
+	$ file libpng15-config
+	
+	libpng15-config: POSIX shell script, ASCII text executable
+
+	This means that libpng-config is not an ELF executable so the ldd command does not work.
+
+$ ldd nl-class-list
+
+	linux-vdso.so.1 =>  (0x00007ffe9fffd000)
+	libnl-cli-3.so.200 => /lib64/libnl-cli-3.so.200 (0x00007f465fc76000)
+	libnl-nf-3.so.200 => /lib64/libnl-nf-3.so.200 (0x00007f465fa5d000)
+	libnl-genl-3.so.200 => /lib64/libnl-genl-3.so.200 (0x00007f465f857000)
+	libdl.so.2 => /lib64/libdl.so.2 (0x00007f465f653000)
+	libnl-3.so.200 => /lib64/libnl-3.so.200 (0x00007f465f432000)
+	libnl-route-3.so.200 => /lib64/libnl-route-3.so.200 (0x00007f465f1c5000)
+	libnl-idiag-3.so.200 => /lib64/libnl-idiag-3.so.200 (0x00007f465efbc000)
+	libpthread.so.0 => /lib64/libpthread.so.0 (0x00007f465eda0000)
+	libm.so.6 => /lib64/libm.so.6 (0x00007f465ea9e000)
+	libc.so.6 => /lib64/libc.so.6 (0x00007f465e6d0000)
+	/lib64/ld-linux-x86-64.so.2 (0x00007f465fe81000)
+
+$ ldd pbmtodjvurle
+
+	linux-vdso.so.1 =>  (0x00007ffe8a7fd000)
+	libnetpbm.so.11 => /lib64/libnetpbm.so.11 (0x00007f9c88cb6000)
+	libm.so.6 => /lib64/libm.so.6 (0x00007f9c889b4000)
+	libc.so.6 => /lib64/libc.so.6 (0x00007f9c885e6000)
+	/lib64/ld-linux-x86-64.so.2 (0x00007f9c88ef6000)
+
+$ ldd policyeditor
+
+not a dynamic executable
+
+	$ man policyeditor
+
+	policyeditor - view and modify security policy settings for javaws and the browser plugin
+
+	$ file policyeditor
+
+	policyeditor: symbolic link to `/etc/alternatives/policyeditor'
+
+	$ file /etc/alternatives/policyeditor
+	
+	/etc/alternatives/policyeditor: symbolic link to `/usr/bin/policyeditor.itweb'
+
+	$ file /usr/bin/policyeditor.itweb
+
+	/usr/bin/policyeditor.itweb: Bourne-Again shell script, ASCII text executable
+
+	This means policyeditor java util which can view and modify security policies for javaws and the 
+	browser plugin.  This means policyeditor is not ELF executeable so ldd does not work for it.
+
+$ ldd rpmdev-sha256
+
+not a dynamic executable
+
+	$ file rpmdev-sha256
+
+	rpmdev-sha256: POSIX shell script, UTF-8 Unicode text executable
+
+	This means that rpmdev-sha256 is not an ELF executeable so ldd does not work for it.
+
+$ ldd stap
+
+	linux-vdso.so.1 =>  (0x00007ffc711cc000)
+	librpm.so.3 => /lib64/librpm.so.3 (0x00007feb23f9b000)
+	libc.so.6 => /lib64/libc.so.6 (0x00007feb23bcd000)
+	librpmio.so.3 => /lib64/librpmio.so.3 (0x00007feb239a0000)
+	libdw.so.1 => /lib64/libdw.so.1 (0x00007feb2374f000)
+	libelf.so.1 => /lib64/libelf.so.1 (0x00007feb23537000)
+	libsqlite3.so.0 => /lib64/libsqlite3.so.0 (0x00007feb23282000)
+	libpthread.so.0 => /lib64/libpthread.so.0 (0x00007feb23066000)
+	libreadline.so.6 => /lib64/libreadline.so.6 (0x00007feb22e20000)
+	libavahi-common.so.3 => /lib64/libavahi-common.so.3 (0x00007feb22c13000)
+	libavahi-client.so.3 => /lib64/libavahi-client.so.3 (0x00007feb22a02000)
+	libssl3.so => /lib64/libssl3.so (0x00007feb227a9000)
+	libsmime3.so => /lib64/libsmime3.so (0x00007feb22581000)
+	libnss3.so => /lib64/libnss3.so (0x00007feb22252000)
+	libnssutil3.so => /lib64/libnssutil3.so (0x00007feb22022000)
+	libplds4.so => /lib64/libplds4.so (0x00007feb21e1e000)
+	libplc4.so => /lib64/libplc4.so (0x00007feb21c19000)
+	libnspr4.so => /lib64/libnspr4.so (0x00007feb219db000)
+	libdl.so.2 => /lib64/libdl.so.2 (0x00007feb217d7000)
+	libstdc++.so.6 => /lib64/libstdc++.so.6 (0x00007feb214d0000)
+	libm.so.6 => /lib64/libm.so.6 (0x00007feb211ce000)
+	libgcc_s.so.1 => /lib64/libgcc_s.so.1 (0x00007feb20fb8000)
+	libbz2.so.1 => /lib64/libbz2.so.1 (0x00007feb20da8000)
+	libz.so.1 => /lib64/libz.so.1 (0x00007feb20b92000)
+	liblzma.so.5 => /lib64/liblzma.so.5 (0x00007feb2096c000)
+	libpopt.so.0 => /lib64/libpopt.so.0 (0x00007feb20762000)
+	libselinux.so.1 => /lib64/libselinux.so.1 (0x00007feb2053b000)
+	libcap.so.2 => /lib64/libcap.so.2 (0x00007feb20336000)
+	libacl.so.1 => /lib64/libacl.so.1 (0x00007feb2012d000)
+	liblua-5.1.so => /lib64/liblua-5.1.so (0x00007feb1feff000)
+	libdb-5.3.so => /lib64/libdb-5.3.so (0x00007feb1fb41000)
+	libaudit.so.1 => /lib64/libaudit.so.1 (0x00007feb1f918000)
+	/lib64/ld-linux-x86-64.so.2 (0x00007feb24758000)
+	libtinfo.so.5 => /lib64/libtinfo.so.5 (0x00007feb1f6ee000)
+	libdbus-1.so.3 => /lib64/libdbus-1.so.3 (0x00007feb1f49e000)
+	librt.so.1 => /lib64/librt.so.1 (0x00007feb1f296000)
+	libpcre.so.1 => /lib64/libpcre.so.1 (0x00007feb1f034000)
+	libattr.so.1 => /lib64/libattr.so.1 (0x00007feb1ee2f000)
+	libcap-ng.so.0 => /lib64/libcap-ng.so.0 (0x00007feb1ec29000)
+	libsystemd.so.0 => /lib64/libsystemd.so.0 (0x00007feb1e9f8000)
+	liblz4.so.1 => /lib64/liblz4.so.1 (0x00007feb1e7e3000)
+	libgcrypt.so.11 => /lib64/libgcrypt.so.11 (0x00007feb1e562000)
+	libgpg-error.so.0 => /lib64/libgpg-error.so.0 (0x00007feb1e35d000)
+	libresolv.so.2 => /lib64/libresolv.so.2 (0x00007feb1e144000)
+
+$ ldd winpopup-install
+
+not a dynamic executable
+
+	$ file winpopup-install
+
+	winpopup-install: Bourne-Again shell script, ASCII text executable
+
+	This means winpopup-install is not ELF executeable so ldd does not work for it.
+
+/////	part 7	/////	
+
+To get a sorted list I put all in a file called list.
+
+$ ldd /usr/bin/base64 > list
+$ ldd /usr/bin/deallocvt >> list
+$ ldd /usr/bin/ghostscript >> list
+$ ldd /usr/bin/info >> list
+$ ldd /usr/bin/nl-class-list >> list
+$ ldd /usr/bin/pbmtodjvurle >> list
+$ ldd /usr/bin/stap >> list
+
+Then I sorted and cut out all the parts of this that were not the dynamic librarys
+
+$ sed 's/\/.*\///' list | sed 's/(.*//' | sed 's/=>.*//' | sort -u > sorted_list
+
+===sorted_list===
+ld-linux-x86-64.so.2 
+libacl.so.1 
+libattr.so.1 
+libaudit.so.1 
+libavahi-client.so.3 
+libavahi-common.so.3 
+libbz2.so.1 
+libc.so.6 
+libcap-ng.so.0 
+libcap.so.2 
+libcom_err.so.2 
+libcrypt.so.1 
+libcrypto.so.10 
+libcups.so.2 
+libcupsimage.so.2 
+libdb-5.3.so 
+libdbus-1.so.3 
+libdl.so.2 
+libdw.so.1 
+libelf.so.1 
+libexpat.so.1 
+libfontconfig.so.1 
+libfreebl3.so 
+libfreetype.so.6 
+libgcc_s.so.1 
+libgcrypt.so.11 
+libgpg-error.so.0 
+libgs.so.9 
+libgssapi_krb5.so.2 
+libidn.so.11 
+libjbig.so.2.0 
+libjpeg.so.62 
+libk5crypto.so.3 
+libkeyutils.so.1 
+libkrb5.so.3 
+libkrb5support.so.0 
+liblcms2.so.2 
+liblua-5.1.so 
+liblz4.so.1 
+liblzma.so.5 
+libm.so.6 
+libnetpbm.so.11 
+libnl-3.so.200 
+libnl-cli-3.so.200 
+libnl-genl-3.so.200 
+libnl-idiag-3.so.200 
+libnl-nf-3.so.200 
+libnl-route-3.so.200 
+libnspr4.so 
+libnss3.so 
+libnssutil3.so 
+libopenjp2.so.7 
+libpaper.so.1 
+libpcre.so.1 
+libplc4.so 
+libplds4.so 
+libpng15.so.15 
+libpopt.so.0 
+libpthread.so.0 
+libreadline.so.6 
+libresolv.so.2 
+librpm.so.3 
+librpmio.so.3 
+librt.so.1 
+libselinux.so.1 
+libsmime3.so 
+libsqlite3.so.0 
+libssl.so.10 
+libssl3.so 
+libstdc++.so.6 
+libsystemd.so.0 
+libtiff.so.5 
+libtinfo.so.5 
+libuuid.so.1 
+libz.so.1 
+linux-vdso.so.1 
+===end===

@@ -1,0 +1,371 @@
+William Randall
+lab 6
+lab.txt 
+
+00000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
+
+implement transliteration programs tr2b and tr2u that use buffered and unbuffered I/O respectively
+compare the resulting implementations and performance
+Each implementation should be a main program that takes two operands from and to
+that are byte strings of the same length
+that copies standard input to standard output
+transliterating every byte in from to the corresponding byte in to
+should report an error from and to are not the same length
+or if from has duplicate bytes
+
+your implementations should like the standard utility tr does
+except that they have no options
+
+characters like [, - and \
+have no special meaning in the operands
+operand errors must be diagnosed
+your implementations act on bytes rather than on (possibly multibyte) characters
+
+/////	part 1	/////
+Write a C transliteration program tr2b.c that uses getchar and putchar to transliterate bytes as described above.
+/////////////////////
+
+I created the tr2b.c program where I made a buffer that was 256 bytes long to store the input
+bytes like a hash table of sorts.  It would map each input char to it's index based on its 
+ascii number. If a duplicate input char was found it would exit because they would map to the 
+same location in the char buf array. Furthermore, it would store the character in the buffer
+so when it needed to find what char to map to it could access that position in the buffer
+and get the mapped char. 
+
+Then throughout I checked for errors such as
+
+incorrect amount of arguments
+stdin error
+output error
+duplicate bytes
+inputs of different lengths
+
+These would all exit with code 1.
+
+To run I first compiled tr2b with
+
+$ gcc tr2b.c -o tr2b
+
+Then I ran these commands to generate the errors
+
+$ ./tr2b
+incorrect amount of arguments
+
+$ ./tr2b a a a
+incorrect amount of arguments
+
+$ ./tr2b aa b
+inputs cannot be different lengths
+
+$ ./tr2b a bb
+inputs cannot be different lengths
+
+$ ./tr2b aa bc
+no duplicate bytes
+
+Then I ran these cases which worked with stdin
+
+$ ./tr2b a b
+>my name is will
+>>my nbme is will
+
+$ ./tr2b wil aaa
+>my name is will
+>>my name as aaaa
+
+/////	part 2	/////
+Write a C program tr2u.c that uses read and write to transliterate bytes, instead of using getchar and putchar. 
+The nbyte arguments to read and write should be 1, so that the program reads and writes single bytes at a time.
+/////////////////////
+
+To change my tr2b program to use read and write I changed the fprintf's to write(2,"error",strlen).
+I also changed getchar() to read(0, c, 1) and putchar() to write(1, &out, 1).
+These would translate one char at a time from the c[1] array which is just one int array of each
+char from the input.
+
+Then I tested it with the same commands and got the same outputs
+
+$ gcc tr2u.c -o tr2u
+$ ./tr2u 
+incorrect amount of arguments
+
+$ ./tr2u a a a
+incorrect amount of arguments
+
+$ ./tr2u aa b
+inputs cannot be different lengths
+
+$ ./tr2u a bb
+inputs cannot be different lengths
+
+$ ./tr2u aa bb
+no duplicate bytes
+
+$ ./tr2u a b
+my name is will
+my nbme is will
+
+$ ./tr2u wil aaa
+my name is will
+my name as aaaa
+
+/////	part 3	/////
+Use the strace command to compare the system calls issued by your tr2b and tr2u commands
+(a) when copying one file to another
+(b) when copying a file to your terminal
+Use a file that contains at least 5,000,000 bytes.
+/////////////////////
+
+//part a//
+
+I made a file called largefile that was 7,769,952 long. 
+Then I used strace to see the difference between how tr2b and tr2u used function calls.
+
+$ strace ./tr2b a b < largefile > out1
+
+===output===
+...
+write(1, "Hello my nbme is will.\nHello my "..., 8192) = 8192
+read(0, " name is will.\nHello my name is "..., 8192) = 8192
+write(1, "o my nbme is will.\nHello my nbme"..., 8192) = 8192
+read(0, "e is will.\nHello my name is will"..., 8192) = 8192
+write(1, " nbme is will.\nHello my nbme is "..., 8192) = 8192
+...
+===end===
+
+$ strace ./tr2u a b < largefile > out2
+
+===output===
+...
+write(1, "i", 1)                        = 1
+read(0, "s", 1)                         = 1
+write(1, "s", 1)                        = 1
+read(0, " ", 1)                         = 1
+read(0, "w", 1)                         = 1
+...
+===end===
+
+Then I ran them with the -c flag
+
+$ strace -c ./tr2b a b < largefile > out1
+
+===output===
+% time     seconds  usecs/call     calls    errors syscall
+------ ----------- ----------- --------- --------- ----------------
+ 45.87    0.001184           1       951           read
+ 40.84    0.001054           1       949           write
+  2.91    0.000075           8         9           mmap
+  2.32    0.000060          30         2           open
+  1.82    0.000047          47         1         1 access
+  1.59    0.000041          41         1           execve
+  1.51    0.000039          39         1           brk
+  1.24    0.000032           8         4           fstat
+  1.05    0.000027           7         4           mprotect
+  0.43    0.000011          11         1           munmap
+  0.31    0.000008           4         2           close
+  0.12    0.000003           3         1           arch_prctl
+------ ----------- ----------- --------- --------- ----------------
+100.00    0.002581                  1926         1 total
+===end===
+
+$ strace -c ./tr2u a b < largefile > out2
+
+===output===
+% time     seconds  usecs/call     calls    errors syscall
+------ ----------- ----------- --------- --------- ----------------
+ 56.28   27.468341           4   7769952           write
+ 43.72   21.334546           3   7769954           read
+  0.00    0.000030           4         7           mmap
+  0.00    0.000024           6         4           mprotect
+  0.00    0.000013           7         2           open
+  0.00    0.000009           9         1           munmap
+  0.00    0.000006           6         1         1 access
+  0.00    0.000004           2         2           close
+  0.00    0.000004           2         2           fstat
+  0.00    0.000003           3         1           execve
+  0.00    0.000003           3         1           arch_prctl
+  0.00    0.000002           2         1           brk
+------ ----------- ----------- --------- --------- ----------------
+100.00   48.802985              15539928         1 total
+===end===
+
+From these results we can tell that tr2b will read in 8192 byte chunks of the file and then print
+out 8192 byte chunks to the output file.
+The tr2u program will read and write one byte at a time effectively making it much slower than tr2b.
+
+This is seen in the time in seconds for system calls in tr2b being 0.002581 seconds and the time
+for tr2u being 48.802985 seconds.
+Furthermore this is seen in the ammount of times read and write are needed to be called using each
+program where tr2b calls read and write much less than tr2u.
+
+//partb//
+
+$ strace -c ./tr2b a b < largefile
+
+===output===
+...
+Hello my nbme is will.
+% time     seconds  usecs/call     calls    errors syscall
+------ ----------- ----------- --------- --------- ----------------
+ 99.68    1.354113           4    337824           write
+  0.31    0.004230           4       951           read
+  0.00    0.000029           3         9           mmap
+  0.00    0.000012           6         2           open
+  0.00    0.000008           2         4           mprotect
+  0.00    0.000007           7         1           execve
+  0.00    0.000006           2         4           fstat
+  0.00    0.000005           5         1         1 access
+  0.00    0.000004           2         2           close
+  0.00    0.000003           3         1           brk
+  0.00    0.000002           2         1           arch_prctl
+  0.00    0.000000           0         1           munmap
+------ ----------- ----------- --------- --------- ----------------
+100.00    1.358419                338801         1 total
+===end===
+
+$ strace -c ./tr2u a b < largefile
+
+===output===
+...
+Hello my nbme is will.
+% time     seconds  usecs/call     calls    errors syscall
+------ ----------- ----------- --------- --------- ----------------
+ 55.64   43.089844           6   7769955         3 write
+ 44.36   34.352598           4   7769954           read
+  0.00    0.000047          47         1           brk
+  0.00    0.000043           6         7           mmap
+  0.00    0.000042          42         1           execve
+  0.00    0.000029           7         4           mprotect
+  0.00    0.000016           8         2           open
+  0.00    0.000011          11         1           munmap
+  0.00    0.000008           8         1         1 access
+  0.00    0.000007           4         2           fstat
+  0.00    0.000006           3         2           close
+  0.00    0.000003           3         1           arch_prctl
+------ ----------- ----------- --------- --------- ----------------
+100.00   77.442654              15539931         4 total
+===end===
+
+We can see from the output of writing to the terminal that again tr2u takes much more time
+than tr2b and tr2u has many more write and read calls than tr2b.
+
+tr2b again reads in 8192 bytes at a time but it writes only 23 bytes at a time.
+also system calls to write to the terminal took more time to execute.
+
+tr2u took more time to write the results to the terminal than it did when it copied it to another
+file.  It also executed the same ammount of reads and writes as it did when it was copying to another 
+file.  
+
+Overall tr2u is much slower than tr2b because of only looking at one byte at a time when reading and writing.
+
+/////	part 4	/////
+Use the time command to measure how much faster one program is, compared to the other, when copying the same amount of data.
+/////////////////////
+
+$ time ./tr2b a b < largefile > out1
+
+real	0m0.263s
+user	0m0.179s
+sys	0m0.008s
+
+$ time ./tr2u a b < largefile > out2
+
+real	0m21.185s
+user	0m4.764s
+sys	0m16.325s
+
+$ time ./tr2b a b < largefile
+
+real	0m8.756s
+user	0m0.331s
+sys	0m0.544s
+
+$ time ./tr2u a b < largefile
+
+real	0m20.606s
+user	0m4.654s
+sys	0m15.618s
+
+We can see here that tr2b is much faster than tr2u because of less calls to read and write.
+Furthermore, printing to terminal makes both programs much slower.
+Finall, when printing to terminal many calls take more time not just the read and write calls.
+
+///end lab.txt///
+///report.txt///
+
+I made files called
+0.txt
+100.txt
+10000.txt
+1000000.txt
+
+Each with 0, 100, 10000, 1000000 lines respectively.
+
+Then I ran each with sfrob and sfrobu with the time command
+
+//sfrob
+0.txt
+real	0m0.103s
+user	0m0.002s
+sys	0m0.002s
+
+100.txt
+real	0m0.113s
+user	0m0.000s
+sys	0m0.004s
+
+10000.txt
+real	0m0.061s
+user	0m0.003s
+sys	0m0.002s
+
+1000000.txt
+real	0m1.140s
+user	0m0.203s
+sys	0m0.011s
+
+//sfrobu
+0.txt
+real	0m0.101s
+user	0m0.003s
+sys	0m0.000s
+
+100.txt
+real	0m0.150s
+user	0m0.002s
+sys	0m0.002s
+
+10000.txt
+real	0m0.243s
+user	0m0.006s
+sys	0m0.026s
+
+1000000.txt
+real	0m14.404s
+user	0m0.792s
+sys	0m2.077s
+
+We can see from comparing the system times that the sfrob.c program is faster
+than the sfrobu.c program.
+
+This is because we know that sfrobu.c is using a buffered input where it uses
+many more system calls than sfrob.c, and because it is not using the optimization
+of getchar and putchar it will take much more time to run.
+
+for sfrob.c
+time = lines * 0.000000011
+for sfrobu.c
+time = lines * 0.000014404
+
+I ran strace for sfrobu and sfrob and I saw that the memory calls that
+sfrobu.c used was the brk() system call to allocate memory.
+It also uses the brk(NULL) system call to be able to find where
+the heap memory ends(so it knows what memory is avaliable to be allocated).
+It allocates the memory with mmap() which maps the virtural memory addresses
+for processes to files.
+
+If I implemented with <stdlib.h> for memory allocation it would likely use
+the functions brk() and mmap().
+
+brk() using an adress arg to set the end position of a process
+mmap() using an adress arg, size, an int of data perms, int for file destination, and flags

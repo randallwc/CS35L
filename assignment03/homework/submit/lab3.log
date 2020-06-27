@@ -1,0 +1,232 @@
+William Randall
+Lab3.log
+
+80 chars length
+00000000000000000000000000000000000000000000000000000000000000000000000000000000
+
+$ locale
+
+This outputted the wrong things so I ran
+
+$ export LC_ALL='C'
+$ locale
+
+==output==
+LANG=en_US.UTF-8
+LC_CTYPE="C"
+LC_NUMERIC="C"
+LC_TIME="C"
+LC_COLLATE="C"
+LC_MONETARY="C"
+LC_MESSAGES="C"
+LC_PAPER="C"
+LC_NAME="C"
+LC_ADDRESS="C"
+LC_TELEPHONE="C"
+LC_MEASUREMENT="C"
+LC_IDENTIFICATION="C"
+LC_ALL=C
+==end==
+
+Then to get the sorted english words I ran
+
+$ cp /usr/share/dict/words ./unsortedWords
+
+Then I sorted them
+
+$ sort unsortedWords > words 
+
+This sorted the words in words.txt and created a file called sorted_words.txt
+
+$ wget https://web.cs.ucla.edu/classes/spring20/cs35L/assign/assign3.html
+
+This created a file named 'assign3.html'
+Then I ran the command
+
+$ tr -c 'A-Za-z' '[\n*]' < assign3.html > traceCMD1.txt
+
+This command outputs only the characters 'A-Z' and 'a-z'. 
+Every other character that is not 'A-Z' or 'a-z' is turned into a new line 
+character.
+This takes the input of the file 'assign3.txt'.
+Finally it outputs to a file 'traceCMD1.txt'. 
+
+$ tr -cs 'A-Za-z' '[\n*]' < assign3.html > traceCMD2.txt 
+
+This command does the same as before but now it has the '-s' added onto the tr 
+command.
+This '-s' flag replaces repeated occurances of characters that are not 'A-Za-z' 
+with a single occurance of the newline characer.
+Essentially it removes the repeated newline characters from the first command.
+
+$ tr -cs 'A-Za-z' '[\n*]' < assign3.html | sort > traceCMD3.txt
+
+This takes the before command and pipes it into the 'sort' command.
+This command sorts the output of the before command so that we can easily see 
+the sorted list of the words.
+It also shows if words are repeated because it will list them each time they 
+are repeated.
+
+$ tr -cs 'A-Za-z' '[\n*]' < assign3.html | sort -u > traceCMD4.txt
+
+This command does the same as before but the '-u' flag on the sort command will 
+remove repeated occurances in the sort.
+This will output a list of the words in the html file without repeats.
+
+$ tr -cs 'A-Za-z' '[\n*]' < assign3.html | sort -u |
+comm - words > traceCMD5.txt
+
+This command will pipe the before command into a 'comm' command.
+The 'comm' command will compare two files / iostreams.
+Here we are comparing the output of the 'sort -u' command to the 'words' file 
+which is the sorted list of words.
+It outputs 3 collumns where the left column is the words only in the output of 
+the 'tr' command,
+the second column is the words only in the words file, and the third column is 
+the words found in both files.
+
+$ tr -cs 'A-Za-z' '[\n*]' < assign3.html | sort -u |
+comm -23 - words > traceCMD6.txt # ENGLISHCHECKER
+
+Finally, this command takes the previous 'comm' command and adds the '-23' flag.
+This '-23' flag will remove the second and third columns from the output.
+This will output the words that are found in the html file but not in the words 
+file which is essentially
+outputting all the incorrectly spelled words in the html file (or the words 
+that are not listed in the words file).
+
+Then I used the command wget to get a copy of the hawaiian dictionary
+
+$ wget https://www.mauimapp.com/moolelo/hwnwdshw.htm
+
+I created the buildwords script.
+
+$ touch buildwords
+
+Then I added executable permissions to it. 
+
+$ chmod +x buildwords
+
+Then I added this to the file
+
+#!/usr/bin/bash
+
+#delete all instances of ‘?’, ‘<u>’ and ‘</u>’
+sed -E 's/<u>|\?|<\/u>//g' |
+
+#remove the <u>,?,</u>
+sed -E 's/<u>|\?|<\/u>//g' |
+
+#replace ` with ' and - with ' '
+tr "\`" "\'" |
+tr "\-" ' ' |
+
+#find all occurances of the text in the form A<tdX>W</td>Z
+#where A and Z are whitespace
+#where X is 0 or more occuances 
+grep -E "\s*<td[^>]*>['pkmnwlhaeiouPKMNWLHAEIOU ]+</td>\s*" |
+
+#remove the 'A<tdX>' and '</td>Z'
+sed -E 's/ *<td[^>]*>//g' |
+sed -E 's/<\/td> *//g' |
+
+#change ' ' to '\n'
+tr -s  ' ' "\n" |
+
+#change uppercase to lowercase
+tr '[:upper:]' '[:lower:]' |
+
+#sort the result and remove duplicates
+sort -u
+
+This shell script works to get all the words in the file 'hwnwdshw.htm' 
+that match the ascii characters that are in hawaiian words, but it 
+does not remove the english words that also match the naming standards.
+
+To make the hwords file I used this command
+
+$ cat hwnwdshw.htm | ./buildwords > hwords
+
+Then using the new 'hwords' file I created a command called #HAWAIIANCHECKER
+This command will change all the upper case letters to lowercase then it will
+sort the results
+The hawaiian checker command is this
+
+$ tr '[:upper:]' '[:lower:]' |
+tr -cs "A-Za-z\'" '[\n*]' |
+sort -u |
+comm -23 - hwords #HAWAIIANCHECKER
+
+To use this to check 'assign3.html' I used the command below
+
+$ tr '[:upper:]' '[:lower:]' < assign3.html |
+tr -cs "A-Za-z\'" '[\n*]' |
+sort -u |
+comm -23 - hwords #HAWAIIANCHECKER
+
+To check the number of misspelled hawaiian words I used the command 
+above piped into the 'wc -w' command
+
+$ tr '[:upper:]' '[:lower:]' < assign3.html |
+tr -cs "A-Za-z\'" '[\n*]' |
+sort -u |
+comm -23 - hwords |
+wc -w
+
+This command gave me 574 misspelled hawaiian words.
+
+To check the number of misspelled english words I used the ENGLISHCHECKER 
+command piped into the 'wc -w' command
+
+$ tr -cs 'A-Za-z' '[\n*]' < assign3.html | sort -u | comm -23 - words | wc -w 
+
+This command gave me 104  misspelled english words.
+
+To compare the number of distinct words in 'assign3.html' ENGLISHCHECKER 
+reports as misspelled but HAWAIIANCHECKER does not
+I used these commands to create two all lowercase files and then I 
+compared them to find the number of differences
+
+$ tr -cs 'A-Za-z' '[\n*]' < assign3.html | sort -u |
+comm -23 - words > Emisspelled
+
+$ tr '[:upper:]' '[:lower:]' < assign3.html | tr -cs "A-Za-z\'" '[\n*]'
+| sort -u | comm -23 - hwords > Hmisspelled
+
+$ comm -23 < Emisspelled - Hmisspelled | wc -w
+
+This told me that there were 72 words that ENGLISHCHECKER counted as 
+misspelled but HAWAIIANCHECKER did not count as misspelled.
+
+$ comm -23 < Hmisspelled - Emisspelled | wc -w
+
+This told me that there were 542 words that HAWAIIANCHECKER counted 
+as misspelled but ENGLISHCHECKER did not count as misspelled.
+
+To find what HAWAIIANCHECKER counts as misspelled but ENGLISHCHECKER does 
+not count as misspelled I ran the following command.
+
+$ comm -23 < Hmisspelled - Emisspelled | less
+
+Two examples are 
+
+==output==
+...
+affect
+afterwards
+...
+==end==
+
+To find what ENGLISHCHECKER counts as misspelled but HAWAIIANCHECKER does
+not count as misspelled I ran the following command.
+
+$ comm -23 < Emisspelled - Hmisspelled | less
+
+Two examples are
+
+==output==
+...
+ENGLISHCHECKER
+EXACT
+...
+==end==

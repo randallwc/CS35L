@@ -1,0 +1,194 @@
+William Randall
+hw8.txt
+
+///// part 2 /////
+
+I entered diffutils then ran the following command to make a backup
+
+$ git checkout -b backup
+$ git add src/*.c
+$ git commit -m "changed accents to apostrophies"
+
+I then checkedout the 3.0 version of diffutils
+
+$ git checkout 022cd5c5eb647a22a4daa5fe5cbc10af6d5a1112 -b quote
+
+///// part 3 /////
+
+I then installed the patch with
+
+$ patch -p1 < ../../submit/quote-3.0-patch.txt 
+
+===output===
+patching file src/cmp.c
+patching file src/diff.c
+patching file src/diff3.c
+patching file src/dir.c
+patching file src/sdiff.c
+patching file src/util.c
+===end===
+
+///// part 4 /////
+
+I read the add-change-log-entry-other-window (C-x 4 a) man page
+
+///// part 5 /////
+
+I updated the ChangeLog for my patch file
+
+$ emacs quote-3.0-patch.txt
+C-x 4 a
+
+===ChangeLog===
+2020-06-02  William Culver Randall  <culver@lnxsrv07.seas.ucla.edu>
+
+        * quote-3.0-patch.txt: This patch is for a
+        change in the standards	for GNU	syntax.	
+        This patch will	quote 'like this' or
+        "like this" but	not `like this'. The changes
+        in this	patch will only	affect the .c files
+        and it will not	affect commentary and
+	documentation.
+===end===
+
+C-x C-s
+y
+
+///// part 6 /////
+
+Then I moved into diffutils and commited the changes
+
+$ git add src/*.c 
+$ git commit -F ../ChangeLog
+
+===output===
+[quote 4dcf030] 2020-06-02  William Culver Randall  <culver@lnxsrv07.seas.ucla.edu>
+ Committer: William Culver Randall <culver@lnxsrv07.seas.ucla.edu>
+Your name and email address were configured automatically based
+on your username and hostname. Please check that they are accurate.
+You can suppress this message by setting them explicitly. Run the
+following command and follow the instructions in your editor to edit
+your configuration file:
+
+    git config --global --edit
+
+After doing this, you may fix the identity used for this commit with:
+
+    git commit --amend --reset-author
+
+ 6 files changed, 43 insertions(+), 43 deletions(-)
+===end===
+
+Then I used 'git log' to check the comit
+
+///// part 7 /////
+
+To create the formatted patch which would remove the need
+to make changes manually I ran the following command.
+
+$ git format-patch -1 --stdout > formatted-patch.txt
+
+'-1' make patch for 1 comit
+'--stdout' outputs the patch to stdout
+
+$ mv formatted-patch.txt ../
+
+///// part 8 /////
+
+$ mkdir temp_patch
+
+I moved into the directory
+
+$ git clone https://git.savannah.gnu.org/git/diffutils.git
+
+I moved into diffutils and checked out a new branch patchery
+
+$ git checkout 022cd5c5eb647a22a4daa5fe5cbc10af6d5a1112 -b patchery
+
+Then I applied the patch
+
+$ git am ../../formatted-patch.txt
+
+Then made it
+
+$ ./bootstrap
+
+$ patch -p0 < ../diffutils-gets.diff
+
+$ ./configure
+$ make
+$ make check
+
+Then I tested it
+
+$ src/diff . -
+$ src/diff --help
+
+There were no ` in either output so it worked.
+
+///// part 9 /////
+
+$ make distdir
+
+This made the directory 'diffutils-3.0.1-93d3' so I entered it
+and cat the ChangeLog file
+
+$ cat ChangeLog
+
+This had my change log comment at the top so It worked
+
+===ChangeLog===
+2020-06-02  William Culver Randall  <culver@lnxsrv07.seas.ucla.edu>
+
+	2020-06-02 William Culver Randall <culver@lnxsrv07.seas.ucla.edu>
+		* quote-3.0-patch.txt: This patch is for a
+		change in the standards for GNU syntax.
+		This patch will quote 'like this' or
+		"like this" but not `like this'. The changes
+		in this patch will only affect the .c files
+		and it will not affect commentary and
+		documentation.
+...
+===end===
+
+///// part 10 /////
+
+I relogged in with the -Y flag then cloned the repo with this command
+Then I ran gitk
+
+$ git clone git://git.savannah.gnu.org/emacs.git emacs-CS-35L
+
+I moved into the emacs-CS-35L directory
+
+$ gitk
+
+newest merge that is not newer than 2015-01-25:
+
+===gitk===
+Author: Paul Eggert <eggert@cs.ucla.edu>  2015-01-24 19:00:41
+Committer: Paul Eggert <eggert@cs.ucla.edu>  2015-01-24 19:02:07
+Parent: f6ef836521dfd07a0a33d5f1f384427f0c4023ce (Use gnustep-config if available)
+Child:  f67446455fc0ec59f5c25c90a8783e571b60dc8f (lisp/gnus/gnus-group.el (gnus-group-suspend): Close all backends)
+Branches: master, remotes/origin/master and many more (137)
+Follows: emacs-24.4
+Precedes: emacs-25.0.90
+
+    * indent/shell.sh (bar): Use '[ $# -eq 0 ]', not '[ $# == 0 ]'.
+    
+    This is more portable in shell scripts.
+    Fixes: bug#19658
+===end===
+
+My view of the merge point is that this commit was not directly merged into master after it was
+committed. Then it was merged into master after other commits were done.
+
+The windows in gitk are
+
+Top Left: this is where the visualization of the git tree is shown
+
+Top Right: this is where the names and emails of the people are who committed changes
+
+Bottom Left: this is a window that shows the patch file and information about the comit
+
+Bottom Right: this is a window that allows for easy movement in the patch file and it
+	      shows the different files that will be changed by the patch file.

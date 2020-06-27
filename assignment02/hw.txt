@@ -1,0 +1,82 @@
+William Randall
+Homework
+
+create key pair (gnu privacy guard's shell commands)(gpg v2)
+I used the command
+
+$ gpg --gen-key
+
+This asked me what kind of key I wantd and I presed enter for "RSA and RSA"
+It asked me for the keysize and I also pressed enter again for the default of 2048
+It asked me how long the key should be valid and I pressed enter for the key not to expire.
+Then it asked me to cofirm and i pressed 'y'.
+Then it asked me for a name and I put "william" and an email and I put "wrandall1000@gmail.com".
+It asked for a comment and I put "will's key".
+It asked me to confirm and I pressed 'O'
+It then asked me to enter a password and I pressed enter to skip every time it asked.
+
+export public key (into hw-pubkey.asc)
+I used this command to copy the public key into a file 'hw-pubkey.asc'
+
+$ cat authorized_keys >> ../hw-pubkey.asc
+
+create detached sig from pubkey (named hw-pubkey.sig)
+Then I used this to create a detached signature which I named 'hw-pubkey.sig' with the command
+
+$ gpg --output hw-pubkey.sig --detach-sig hw-pubkey.asc
+
+Question 1
+
+Suppose the other teams really had been observing all the bytes going across the network in your lab 
+exercise. Is your resulting network still secure? If so, explain why, and explain whether your answer 
+would change if 
+
+(1) you assumed the other teams had also tapped your keyboards after you completed all 
+client-server setup and had thereby obtained your team's keystrokes during later operation, or 
+
+(2) you are booting off USB and you assume the other teams temporarily had physical control of the USB. If not, 
+explain any weaknesses of your team's setups, focusing on possible attacks by such outside observers.
+
+===
+
+If I just used ssh to send data to the server then the data is safe from the othrer teams trying to watch the bytes
+going across the network.  This data will be encripted with the public key which the other team could get, but 
+this would not be able to be decrypted unless the other team had access to the private key which the reciever has, and
+which is not available from just watching the bytes over the network. The data after this authentication stage 
+will be encriped with the symmetric encription key (session key). Because the other team doesnt hhave both the 
+public and private keys they can't decript the session, and therefore our data is safe.
+
+1.  If they had access to our keyboards during authentication our data would not be secure because they would 
+be able to get the password which is the reason our data stays encrypted.  This would let them decrypt our data
+during the connection time.  They would also be able to generate a session key because of this password.
+
+2.  If the team had access to the USB we would use to boot our ssh environment on then we would also not have
+a secure session.  This is because they could get root access which can let them see the .ssh folder on the USB.
+This would show them the public and private keys and this will let them decrypt our session data and they could also
+sent malicious correctly encrypted data to interfere with our ssh session.
+
+Question 2
+
+Explain why the gpg2 --verify command in the following instructions doesn't really verify that you personally created 
+the file in question. How would you go about fixing this problem?
+
+The --verify command doesnt verify that I persionally created the file in question and one way to fix this is to
+use a signature.
+
+The sender makes a hash based on what is in the file he/she is sending.
+They encrypt the message with the private key, making the sender's signature.
+Then they send the message and signature.
+
+The reciever has the public key of the sender.
+They decrypt the message and make the hash value from the message.
+Then they check if the hash value matches the hash value the sender had.
+
+This function only works if you assume the private key is secret.
+
+A solution that many companies use is a 3rd party company that keeps track of public keys of every individual
+in a company.  Then they can verify the signature of each message by comparing the signature that is signed by
+the 3rd party and the signature generated from the public key that came with the message we recieve.  If the key
+matches from the sender and from the 3rd party then we know the message is unaltered.
+
+This could also be done with the reviever keeping a signature to compare with on their own computer but this
+could be less secure. This is all assuming the 3rd party is legitimate and secure.

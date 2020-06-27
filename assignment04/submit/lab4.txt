@@ -1,0 +1,197 @@
+William Randall
+Lab 4
+
+00000000000000000000000000000000000000000000000000000000000000000000000000000000
+
+//Part 1//
+
+Create the shell script
+
+$ touch la
+
+===file===
+#!/bin/sh
+exec /usr/bin/ls -a "$@"
+===end===
+
+Add executeable permissions to the shell script.
+
+$ chmod +x la
+
+I tested it out with
+
+$ ./la -A
+
+Which outputted all files including '.' and '..'
+
+To check the version of ls in the /usr/bin/ls.
+I ran the command
+
+$ /usr/bin/ls --version
+
+===output===
+ls (GNU coreutils) 8.22
+Copyright (C) 2013 Free Software Foundation, Inc.
+License GPLv3+: GNU GPL version 3 or later <http://gnu.org/licenses/gpl.html>.
+...
+===end===
+
+I used wget to get the Coreutils 8.29 taball.
+
+$ wget ftp://ftp.gnu.org/gnu/coreutils/coreutils-8.29.tar.xz
+
+I used wget to get the signature of the Coreutils 8.29 taball.
+
+$ wget ftp://ftp.gnu.org/gnu/coreutils/coreutils-8.29.tar.xz.sig
+
+I used wget to get the gnu-keyring.
+
+$ wget https://ftp.gnu.org/gnu/gnu-keyring.gpg
+
+Then I used gpg to verify the signature with the keyring.
+
+$ gpg --verify --keyring ./gnu-keyring.gpg coreutils-8.29.tar.xz.sig
+
+===output===
+gpg: Signature made Wed Dec 27 10:29:05 2017 PST using RSA key ID 306037D9
+gpg: Good signature from "P?draig Brady <P@draigBrady.com>"
+gpg:                 aka "P?draig Brady <pbrady@redhat.com>"
+gpg:                 aka "P?draig Brady <pixelbeat@gnu.org>"
+gpg: WARNING: This key is not certified with a trusted signature!
+gpg:          There is no indication that the signature belongs to the owner.
+Primary key fingerprint: 6C37 DC12 121A 5006 BC1D  B804 DF6F D971 3060 37D9
+===end===
+
+This output says "This key is not certified with a trusted signature! There
+is no indication that the signature belongs to the owner" because I
+downloaded the signature from the internet and I do not own it.
+
+//Part 2//
+
+Then I unzipped the tarball.
+
+$ tar -xvf coreutils-8.29.tar.xz
+
+To compile the program, I read the file in "coreutils-8.29/INSTALL" 
+
+$ vim coreutils-8.29/INSTALL
+
+I made a cu_temp folder for the later install
+
+$ mkdir cu_temp
+
+I went into the coreutils-8.29 folder, and then I ran the configure command
+with the prefix option to install it into my new 'cu_temp' folder.
+
+I had to get the full path to the 'cu_temp' folder for this to work.
+
+$ ./configure --prefix=/u/ee/ugrad/culver/cs35L/assignment4/cu_temp
+
+To compile I used the 'make' command and the 'make install' command
+
+$ make
+$ make install
+
+//Part 3//
+
+Then I tested if the bug was still in this version of coreutils
+I moved into the cu_temp folder then ran this command
+
+$ ./bin/ls -a -A
+
+===output===
+.  ..  bin  libexec  share
+===end===
+
+The bug still exists because '.' and '..' are displayed
+meaning the '-A' doesn't override '-a'
+
+//Part 4//
+
+I went into the 'coreutils-8.29 folder'.
+Then I made the patch file and pasted the contents from the webpage into it.
+
+$ touch cuPatch
+$ vim cuPatch
+
+Then I applied the patch file with 
+
+$ patch -p1 < cuPatch
+
+The '-p1' flag strip one level of directory
+
+===output===
+Hunk #1 FAILED at 4.
+1 out of 1 hunk FAILED -- saving rejects to file NEWS.rej
+patching file src/ls.c
+Hunk #1 succeeded at 1900 (offset -3 lines).
+patching file tests/local.mk
+patching file tests/ls/a-option.sh
+===end===
+
+The "hunk #1 failed" message is because the NEWS file was not changed
+by the patch file and the diff was put into NEWS.rej
+But this is ok because NEWS seems to be a log of changes, so failed
+changes to this file will not affect functionality.  This could have
+come because the patch file might have been made for a slightly different
+version of core utils.
+
+This is ok because it says that it patch ed the files 'ls.c', 'local.mk', and 
+'a-option.sh'.
+
+//Part 5//
+
+I moved into my top level source directory which is the folder that
+contains 'coreutils-8.29'.
+
+I used the command
+
+$ autoreconf --force --install
+
+to update my make configurations because my make file didn't immediately work. 
+
+Then I ran the make command to make this 
+fixed version of the coreutils.
+
+$ make
+
+The 'make install' command is not needed because all it would
+do would be overwrite the other temp folder with the commands
+in it (cu_temp).  We can just check if it changed it in the
+src directory in the 'coreutils-8.29' folder.
+
+//Part 6//
+
+Now I can see if the patched version works the way I expect.
+
+So I run the command
+
+$ ./src/ls -a -A
+
+Here is the output of the command
+
+$ ./src ls -aA -1
+
+so it can be seen better
+===output===
+.mailmap
+.prev-version
+.tarball-version
+.timestamp
+.version
+.vg-suppressions
+ABOUT-NLS
+AUTHORS
+COPYING
+ChangeLog
+GNUmakefile
+INSTALL
+Makefile
+Makefile.am
+... // this is just because output continues beyond this point
+===end===
+
+This was in the 'coreutils-8.29' directory.
+Finally, because the '.' and the '..' directories are not shown
+we know that the patch worked, and the -A flag overrides the -a
+flag

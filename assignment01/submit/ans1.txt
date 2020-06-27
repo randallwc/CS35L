@@ -1,0 +1,278 @@
+ans
+
+1.	What shell command uses the man program to print all the commands that have a specific word in their man page (or at least the description part of the man page)? (hint: man man)	
+
+	man -k [argument]
+
+2.	Where are the mv and sh programs located in the file system? List any shell commands you used to answer this question.
+
+	$ which mv
+
+	/usr/local/cs/bin/mv
+
+	$ which sh
+
+	/usr/bin/sh
+
+	This is not accounting for the symbolic linking of each of these commands which can be found by cd into the directory then 'ls -l [sh or mv]' to find where the
+	executeable is symbollically linked to because it will show a '->' in the output or a leading 'l' char in the perms.
+
+3.	What executable programs in /usr/bin have names that are exactly two characters long and end in r, and what do they do? List any shell commands you used to answer this question.
+
+	$ cd /usr/bin
+	$ ls -l ?r
+	
+	-rwxr-xr-x 1 root root 62688 Sep 26  2019 ar
+	-rwxr-xr-x 1 root root 66752 Mar 15  2019 pr
+	-rwxr-xr-x 1 root root 45752 Mar 15  2019 tr
+
+	$ find -executable -name "?r"
+
+	./tr
+	./ar
+	./pr
+
+	This means there are 3 executables that are 
+
+	tr, ar, and pr
+
+4.	When you execute the command named by the symbolic link /usr/bin/emacs, which file actually is executed? List any shell commands you used to answer this question.
+
+	$ cd /usr/bin/
+	$ ls -l emacs
+
+	lrwxrwxrwx 1 root root 23 Jan  2  2019 emacs -> /etc/alternatives/emacs
+
+	$ cd /etc/alternatives/
+	$ ls -l emacs
+
+	lrwxrwxrwx 1 root root 19 Jan  2  2019 emacs -> /usr/bin/emacs-24.3
+
+	$ cd /usr/bin/
+	$ ls -l emacs-24.3
+
+	-rwxr-xr-t 1 root root 14792792 Sep 12  2018 emacs-24.3
+
+	This does not have a symbolic link so
+
+	$ pwd emacs-24.3
+
+	/usr/bin
+
+	The file that is actually executed is 
+
+	'/usr/bin/emacs-24.3'
+
+5.	What is the version number of the /usr/bin/gcc program? of the plain gcc program? Why are they different programs?
+
+	$ /usr/bin/gcc -v
+
+	...
+	gcc version 4.8.5 20150623 (Red Hat 4.8.5-39) (GCC) 
+	
+	The version of '/usr/bin/gcc'  is 4.8.5
+	
+	$ gcc -v
+	
+	...
+	gcc version 9.3.0 (GCC) 
+
+	The version of plain gcc is 9.3.0
+
+	They are different programs because I changed my path variable which changes the path the shell looks for gcc when I run normal gcc.
+
+	Also they are different executeables seen with 'which gcc' vs 'which /usr/bin/gcc' and 'ls -l gcc' in the given directories.
+
+6.	The chmod program changes permissions on a file. What does the symbolic mode u+sx,o-w mean, in terms of permissions?
+
+	'u + sx' means the user is adding executeable access to a file ('x') and it allows for the user to set user ID upon execution ('s').
+
+	'o-w' mean it removed the writing permissions from the the users not in gropu u or g (the other gropus).	
+
+7.	Use the find command to find all directories modified in the last four weeks that are located under (or are the same as) the directory /usr/local/cs. List any shell commands you used to answer this question.
+	
+	$ cd /usr/local/cs
+	$ find /usr/local/cs -type d -mtime -28
+
+	/usr/local/cs
+	/usr/local/cs/src/git
+	/usr/local/cs/src/git/RCS
+	/usr/local/cs/src/coreutils
+	/usr/local/cs/src/coreutils/RCS
+	...
+
+	This output was much longer, but here are the first 5 entries.
+	
+	$ find /usr/local/cs -type d -mtime -28 | wc
+
+	    446     446   21685
+
+	This means there are 446 entries.
+
+8.	Of the files in the same directory as find, how many of them are symbolic links? List any shell commands you used to answer this question.
+
+	$ which find
+
+	/usr/bin/find
+
+	$ find /usr/bin/ -type l
+	
+	/usr/bin/xzegrep
+	/usr/bin/htxelatex
+	/usr/bin/mysql_config
+	/usr/bin/gpgv
+	/usr/bin/lpstat
+	...
+
+	This is the first 5 entries of the output.
+	
+	$ find /usr/bin/ -type l | wc -l
+
+	303
+
+	This mean there were 303 entries.	
+
+9.	What is the oldest regular file in the /usr/lib64 directory? Use the last-modified time to determine age. Specify the name of the file without the /usr/lib64/ prefix. Consider files whose names start with ".". List any shell commands you used to answer this question.
+
+	$ cd /usr/lib64
+	$ ls -alt
+
+	The last entry in this list is the oldest regular file.
+
+	It is 'librom1394.so.0.3.0'.	
+
+10.	Where does the locale command get its data from? List any shell commands you used to answer this question.
+
+	$ man locale
+
+	...
+       /usr/lib/locale/locale-archive
+              Usual default locale archive location.
+
+       /usr/share/i18n/locales
+              Usual default path for locale definition files.
+	...
+
+	These are under the files secion of the man page for locale.
+
+	$ man 7 locale
+
+	This man page for locale says that locale gets it data from the environment you are in.  It uses your environment and 'LOCPATH' to get data.
+
+11.	In Emacs, what commands have downcase in their name? List any Emacs commands you used to answer this question.
+
+	C-h a downcase
+
+	...
+	downcase-dwim                 M-x ... RET
+	   Downcase words in the region, if active; if not, downcase word at
+	   point.
+	downcase-region               C-x C-l
+	   Convert the region to lower case.  In programs, wants two
+	   arguments.
+	downcase-word                 M-l
+	   Convert to lower case from point to end of word, moving over.
+	...
+
+	The commands are 'downcase-dwim', 'downcase-region', and 'downcase-word'.
+
+12.	Briefly, what do the Emacs keystrokes C-M-r through C-M-v do? Can you list their actions concisely? List any Emacs commands you used to answer this question.
+
+	C-h b	get help for bindings
+
+	C-x o	switch windows
+
+	C-x C-c to close emacs
+
+	C-h a [name of command] to get help with a command
+
+	C-M-r	isearch-backward-regexp		Do incremental search backward for regular expression.	
+	C-M-s	isearch-forward-regexp		Do incremental search forward for regular expression.
+	C-M-t	transpose-sexps			Transpose two balanced expressions.
+	C-M-u	backward-up-list		Move backward out of one level of parentheses.
+	C-M-v	scroll-other-window		This scrolls in the other window you have open
+
+13.	In more detail, what does the Emacs keystroke C-g do? List any Emacs commands you used to answer this question.
+
+	C-h b	to find the command and get a description	
+
+	(keyboard-quit)
+
+	Signal a 'quit' condition.
+	During execution of Lisp code, this character causes a quit directly.
+	
+	You can use the command C-g when you are half way through writing an incorrect command and it will signal a quit and then you can restart typing your command.
+
+14.	What does the Emacs yank function do, and how can you easily invoke it using keystrokes? List any Emacs commands you used to answer this question.
+
+	C-h f yank	this gives a description of yank
+	C-h k C-y	both give same info
+	
+	C-y		this is the yanking command
+	
+	This command is essentially a paste that pastes back in text that was killed into the kill buffer.
+
+	It doesn't bring back deleted text, just killed text.	
+
+15.	When looking at the directory /usr/bin, what's the difference between the output of the ls -l command, and the directory listing of the Emacs dired command? List any shell or Emacs commands you used to answer this question.
+
+	C-h f dired
+	dired is an interactive autoloaded Lisp function in 'dired.el'.
+
+	It is bound to C-x d
+
+	=output=
+	/usr/bin:
+	total used in directory 350340 available 9454012
+	dr-xr-xr-x.   2 root root       81920 Dec 18 13:15 .
+	drwxr-xr-x.  16 root root        4096 May 22  2018 ..
+	-rwxr-xr-x    1 root root       41544 Mar 15  2019 [
+	-rwxr-xr-x    1 root root       10568 Jan 15  2018 411toppm
+	-rwxr-xr-x    1 root root      107904 Jan  7  2019 a2p
+	-rwxr-xr-x    1 root root       52640 Jun  9  2019 ab
+	-rwxr-xr-x    1 root root       11336 Mar 20  2019 abrt-action-analyze-backtrace
+	-rwxr-xr-x    1 root root       11320 Mar 20  2019 abrt-action-analyze-c
+	-rwxr-xr-x    1 root root        1345 Mar 20  2019 abrt-action-analyze-ccpp-local
+	-rwxr-xr-x    1 root root        6821 Mar 20  2019 abrt-action-analyze-core
+	-rwxr-xr-x    1 root root       11312 Mar 20  2019 abrt-action-analyze-oops
+	...
+	========
+	
+	ls -l
+
+	=output=
+	total 350252
+	-rwxr-xr-x    1 root root       41544 Mar 15  2019 '['
+	-rwxr-xr-x    1 root root       10568 Jan 15  2018  411toppm
+	-rwxr-xr-x    1 root root      107904 Jan  7  2019  a2p
+	-rwxr-xr-x    1 root root       52640 Jun  9  2019  ab
+	-rwxr-xr-x    1 root root       11336 Mar 20  2019  abrt-action-analyze-backtrace
+	-rwxr-xr-x    1 root root       11320 Mar 20  2019  abrt-action-analyze-c
+	-rwxr-xr-x    1 root root        1345 Mar 20  2019  abrt-action-analyze-ccpp-local
+	-rwxr-xr-x    1 root root        6821 Mar 20  2019  abrt-action-analyze-core
+	-rwxr-xr-x    1 root root       11312 Mar 20  2019  abrt-action-analyze-oops
+	-rwxr-xr-x    1 root root       11312 Mar 20  2019  abrt-action-analyze-python
+	-rwxr-xr-x    1 root root        2814 Mar 20  2019  abrt-action-analyze-vmcore
+	-rwxr-xr-x    1 root root        1348 Mar 20  2019  abrt-action-analyze-vulnerability
+	-rwxr-xr-x    1 root root       11360 Mar 20  2019  abrt-action-analyze-xorg
+	-rwxr-xr-x    1 root root        5002 Mar 20  2019  abrt-action-check-oops-for-hw-error
+	-rwxr-xr-x    1 root root       11344 Mar 20  2019  abrt-action-generate-backtrace
+	-rwxr-xr-x    1 root root       11328 Mar 20  2019  abrt-action-generate-core-backtrace
+	-rwxr-xr-x    1 root root        8341 Mar 20  2019  abrt-action-install-debuginfo
+	-rwxr-xr-x    1 root root        3207 Mar 20  2019  abrt-action-list-dsos
+	-rwxr-xr-x    1 root root        8958 Mar 20  2019  abrt-action-notify
+	-rwxr-xr-x    1 root root        3535 Mar 20  2019  abrt-action-perform-ccpp-analysis
+	-rwxr-xr-x    1 root root        1292 Mar 20  2019  abrt-action-save-kernel-data
+	-rwxr-xr-x    1 root root       23800 Mar 20  2019  abrt-action-save-package-data
+	-rwxr-xr-x    1 root root       15480 Mar 20  2019  abrt-action-trim-files
+	-rwxr-xr-x    1 root root       48720 Mar 20  2019  abrt-applet
+	...
+	========
+
+	C-s dired 	search in manual
+
+	Dired has more entries than ls -l.
+
+	'ls -l' just lists data but 'dired' lets you use the file names and meta data to execute commands and to use those args as arguments in commands.
+
+	Dired allows you to move fluidly (backwards and forwards) through the file manager also unlike ls.	

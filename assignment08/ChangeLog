@@ -1,0 +1,10 @@
+2020-06-02  William Culver Randall  <culver@lnxsrv07.seas.ucla.edu>
+
+	* quote-3.0-patch.txt: This patch is for a
+	change in the standards for GNU syntax.
+	This patch will quote 'like this' or
+	"like this" but not `like this'. The changes
+	in this patch will only affect the .c files
+	and it will not affect commentary and
+	documentation.
+

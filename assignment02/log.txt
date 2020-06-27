@@ -1,0 +1,62 @@
+William Randall
+Lab 2
+
+First I ran these two commands to install openssh-server and client on my computer.
+
+$ brew install openssh
+
+Then to check if it was installed I used
+
+$ brew list
+
+This showed me that it had installed openssh and its dependencies.
+
+$ ssh-keygen
+
+It asked for a file and you can just use the default file name by just pressing enter.
+Then you enter your password.
+
+$ ssh-copy-id -i culver@lnxsrv09.seas.ucla.edu
+
+It prompted me for the password seasnet and then it gave my public key to the server lnxsrv09.
+
+$ ssh culver@lnxsrv09.seas.ucla.edu
+
+This allowed me to login without needing a password to the lnxsrv09.
+
+On my mac I downloaded XQuartz and used the command 
+
+$ ssh -X culver@lnxsrv09.seas.ucla.edu
+
+to connect to server 9.  Then I used the command
+
+$ xeyes
+
+to get a gui on my mac that would respond to mouse movements.
+
+To test the multihopping capabilities of my setup I sshed from my mac to server 9
+with the command
+
+$ ssh-add
+
+This is a ssh agent for mac that needs to be run for the -A command to work properly.
+
+$ ssh -A culver@lnxsrv09.seas.ucla.edu
+
+$ ssh -A culver@lnxsrv07.seas.ucla.edu
+
+$ exit
+
+$ exit
+
+to leave the servers
+
+or I could use
+
+$ ssh -t -A culver@lnxsrv09.seas.ucla.edu ssh -A culver@lnxsrv07.seas.ucla.edu
+
+$ exit
+
+This would take me back to my home computer's terminal.
+
+

@@ -1,0 +1,10 @@
+memory leak when input ends in ' '
+fixed with an or statement at the end of input function for checking if word_l == 0
+
+test cases
+
+gcc -o sfrob -g sfrob.c
+
+valgrind --leak-check=full ./sfrob
+
+printf '*~BO *{_CIA *hXE]D *LER #@_GZY #E\\OX #^BO #FKPS #NEM\4 ' | valgrind --leak-check=full ./sfrob | od -ta

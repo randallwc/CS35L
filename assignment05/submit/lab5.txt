@@ -1,0 +1,301 @@
+William Randall
+Lab 5
+
+I downloaded the coreutils with the command below
+
+$ wget https://web.cs.ucla.edu/classes/spring20/cs35L/assign/coreutils-with-bug.tar.gz
+
+Then I unziped it
+
+$ tar -xvf coreutils-with-bug.tar.gz
+
+Then I made a temp directory and made the coreutils-with-bug
+
+$ mkdir cu_temp
+$ cd coreutils-with-bug/
+
+$ ./configure --prefix=/u/ee/ugrad/culver/cs35L/assignment5/cu_temp
+$ make
+
+An error occured when I ran the make command
+
+===output===
+...
+In file included from utimecmp.c:41:
+utimens.h:2:5: error: conflicting types for 'futimens'
+    2 | int futimens (int, char const *, struct timespec const [2]);
+      |     ^~~~~~~~
+In file included from utimecmp.h:25,
+                 from utimecmp.c:25:
+/usr/include/sys/stat.h:373:12: note: previous declaration of 'futimens' was here
+  373 | extern int futimens (int __fd, const struct timespec __times[2]) __THROW;
+      |            ^~~~~~~~
+...
+===end===
+
+So I downloaded the patch and then used the patch
+
+$ wget https://web.cs.ucla.edu/classes/spring20/cs35L/assign/coreutils.diff
+$ patch -p0 < coreutils.diff
+
+I used the 'p0' option because I did not want to cut off the initial parts of the path directories
+
+Then I ran make again and it did not show those errors.
+
+$ make
+
+Finally I ran make install to install the core utils into my temp directory
+
+$ make install
+
+In the patch file we can see
+
+===patch===
+...
+-futimens (int fd ATTRIBUTE_UNUSED,
++coreutils_futimens (int fd ATTRIBUTE_UNUSED,
+...
+-int futimens (int, char const *, struct timespec const [2]);
++int coreutils_futimens (int, char const *, struct timespec const [2]);
+...
+-static bool tee (int nfiles, const char **files);
++static bool coreutils_tee (int nfiles, const char **files);
+...
+===end===
+
+Here we can see that the patch file changed some of the function definitions to be
+different so that every function in core utils will have a different name from 
+the other functions.
+
+to test the bug I ran the following commands in my temp directory
+
+$ tmp=$(mktemp -d)
+$ cd $tmp
+$ touch -d '1918-11-11 11:00 GMT' wwi-armistice-cs35L
+$ touch now
+$ sleep 1
+$ touch now1
+
+Then I called the ls command to see the bug
+
+$ TZ=UTC0 /u/ee/ugrad/culver/cs35L/assignment5/cu_temp/bin/ls -lt --full-time wwi-armistice-cs35L now now1
+
+===output===
+-rw-r--r-- 1 culver eeugrad 0 1918-11-11 11:00:00.000000000 +0000 wwi-armistice-cs35L
+-rw-r--r-- 1 culver eeugrad 0 2020-05-10 03:31:59.224112215 +0000 now1
+-rw-r--r-- 1 culver eeugrad 0 2020-05-10 03:31:53.741903495 +0000 now
+===end===
+
+This shows that the file that should be at the bottom is actually the first entry
+in the output of the ls command in my temp directory
+
+Then I ran the ls command in my temp directory in gdb to see what was causing this issue
+
+$ gdb /u/ee/ugrad/culver/cs35L/assignment5/cu_temp/bin/ls
+
+(gdb) b main
+(gdb) run -lt --full-time
+(gdb) step
+
+I stepped through until I got to the function that sorted the output
+called "sort_files ()" then I reran the ls command an set a breakpoint at that function
+
+(gdb) b sort_files
+(gdb) run -lt --full-time
+(gdb) step
+
+Then I got to the function which was called to sort the files called "compare_mtime"
+Which I created another breakpoint at then re ran the ls command
+
+(gdb) b compare_mtime
+(gdb) run -lt --full-time
+(gdb) step
+
+Then I found this called the function "cmp_mtime" which I stepped into 
+
+(gdb) step
+
+This command called "timespec_cmp" which I then looked at
+
+(gdb) l
+
+===output===
+43	/* Return negative, zero, positive if A < B, A == B, A > B, respectively.
+44	   Assume the nanosecond components are in range, or close to it.  */
+45	static inline int
+46	timespec_cmp (struct timespec a, struct timespec b)
+47	{
+48	  int diff = a.tv_sec - b.tv_sec;
+49	  return diff ? diff : a.tv_nsec - b.tv_nsec;
+50	}
+...
+===end===
+
+Then I printed the 3 diff values for the difference between each of the files and got
+these three diff values
+
+(gdb) p diff
+
+===values===
+now - wwi-armistice-cs35L = -1092059777
+wwi-armistice-cs35L - now1 = 1092059783
+now1 - now = 6
+===end===
+
+because diff is a signed int it overflows due to the limit of the values of a signed interger
+
+
+
+The actual difference between wwi-armistice-cs35L and now1 should be
+
+-rw-r--r-- 1 culver eeugrad 0 1918-11-11 11:00:00.000000000 +0000 wwi-armistice-cs35L
+-rw-r--r-- 1 culver eeugrad 0 2020-05-10 03:31:59.224112215 +0000 now1
+------------------------------------
+difference is 3,202,907,519 seconds
+
+This value is 
+10111110111010000111110101111111 in base 2 unsigned
+but the value we got was 1,092,059,783 which is 
+1000001000101111000001010000111 in base 2 unsigned
+
+If we attempt to store ... in a signed interger we get 10111110 11101000 01111101 01111111
+which when converted back into base 10 gives us -1092059777. 
+
+This shows us that there is an overflow which results in the incorrect calculation
+of the diff value.
+
+To fix this I rewrote the "timespec_cmp" function to deal with interger overflow
+by limiting the values to be within -2147483648 to 2147483647 which are the 
+limits for 32 bit signed int
+
+===timespec_cmp===
+timespec_cmp (struct timespec a, struct timespec b)
+{
+	int big_num = 2147483647; // biggest signed interger
+	int small_num = -2147483648; // smallest signed interger
+	int diff = a.tv_sec - b.tv_sec;
+
+	if ((diff < 0) && 
+	(a.tv_sec > 0) && 
+	(b.tv_sec < 0)) { // if overflow is positive
+		return big_num;
+	}
+
+	if ((diff > 0) && 
+	(a.tv_sec < 0) && 
+	(b.tv_sec > 0)) { // if overflow is negative
+		return small_num;
+	}
+
+	if (diff == 0) {
+		int diff_n = a.tv_nsec - b.tv_nsec;
+
+		if ((diff_n < 0) && 
+		(a.tv_nsec > 0) && 
+		(b.tv_nsec < 0)) { // if overflow is positive for nsec
+			return big_num;
+		}
+
+		if ((diff_n > 0) && 
+		(a.tv_nsec < 0) && 
+		(b.tv_nsec > 0)) { // if overflow is negative for nsec
+			return small_num;
+		}
+
+		return diff_n;
+	}
+	else {
+		return diff;
+	}
+}
+===end===
+
+This first compares the tv_sec values of a and b then if those are equal
+It compares the tv_nsec values of a and b
+
+when they are subtracted it checks for overflow by checking if the subtraction seems legitimate
+
+(+) - (-) = (-)
+(-) - (+) = (+)
+
+These two scenarios are where the overflow can be caught and treated by the limiting.
+
+I found the ./lib/timespec.h file with the command (while in the coreutils-with-bug directory)
+
+$ find . timespec | grep -i "timespec"
+
+Then I copied it and changed it and renamed the file "timespec_new.h"
+
+Then I made the diff file in the lib folder of the coreutils-with-bug directory
+
+$ diff -u timespec.h timespec_new.h > lab5.diff
+
+Then I changed the file names so that it would just change "lib/timespec.h"
+
+===diff===
+--- lib/timespec.h      2005-09-21 23:05:39.000000000 -0700
++++ lib/timespec.h      2020-05-09 23:52:26.598213000 -0700
+...
+===end===
+
+I applied the diff, made core utils, and I re ran the test scenario
+
+$ rm -fr $tmp
+$ patch -p0 < lab5.diff
+$ make
+$ tmp=$(mktemp -d)
+$ cd $tmp
+$ touch -d '1918-11-11 11:00 GMT' wwi-armistice-cs35L
+$ touch now
+$ sleep 1
+$ touch now1
+$ TZ=UTC0 /u/ee/ugrad/culver/cs35L/assignment5/coreutils-with-bug/src/ls -lt --full-time wwi-armistice-cs35L now now1
+
+===output===
+-rw-r--r-- 1 culver eeugrad 0 2020-05-10 07:15:51.232148282 +0000 now1
+-rw-r--r-- 1 culver eeugrad 0 2020-05-10 07:15:45.893945041 +0000 now
+-rw-r--r-- 1 culver eeugrad 0 1918-11-11 11:00:00.000000000 +0000 wwi-armistice-cs35L
+===end===
+
+This patch seemed to fix the bug by placing the wwi-armistice-cs35L at the bottom and the now and now1 are also
+in the correct order.
+
+Now I tried the commands in my home directory to see if the problem exists with the core utils of the SEAS servers.
+
+$ cd
+$ rm -fr $tmp
+$ tmp=$(mktemp -d)
+$ cd $tmp
+$ touch -d '1918-11-11 11:00 GMT' wwi-armistice-cs35L
+$ touch now
+$ sleep 1
+$ touch now1
+$ TZ=UTC0 ls -lt --full-time wwi-armistice-cs35L now now1
+
+===output===
+-rw-r--r-- 1 culver eeugrad 0 2020-05-10 07:20:28.465703595 +0000 now1
+-rw-r--r-- 1 culver eeugrad 0 2020-05-10 07:20:18.468322950 +0000 now
+-rw-r--r-- 1 culver eeugrad 0 1918-11-11 11:00:00.000000000 +0000 wwi-armistice-cs35L
+===end===
+
+It seems that the version installed on the SEAS servers works and this bug has been patched.
+
+I searched throught the directory /usr/src/debug/gnutls-3.3.29/src/ and found 
+timespec.h in the /gl subdirectory
+
+In this timespec.h file I found the declaration for timespec_cmp
+
+===timespec.h===
+...
+timespec_cmp (struct timespec a, struct timespec b)
+{
+  return (a.tv_sec < b.tv_sec ? -1
+          : a.tv_sec > b.tv_sec ? 1
+          : (int) (a.tv_nsec - b.tv_nsec));
+}
+...
+===end===
+
+Here it seems like they are fixing the problem of interger overflow by just returning a -1
+if a.tv_sec < b.tv_sec and a 1 if a.tv_sec > b.tv_sec else they return the difference 
+between a.tv_nsec and b.tv_nsec casted to an int.

@@ -1,0 +1,160 @@
+#!/usr/bin/bash
+
+################################################################################
+
+#this shell script accepts a project's directory name D as an operand
+#and then looks for violations of the below cases
+#must work in the given directory and recursively
+
+#constraints for D
+#if D is not a directory output stderr then exit with failure
+#if D is a symbolic link it should do the same
+#if no directory is given it should be treated as '.'
+#if D is two or more operands it should output to stderr then exit with failure
+#if D starts with '-' it should output to stderr then exit with failure
+#if there is a lack of permissions it should
+#output to stderr and exit without error status
+#D can contain special chars '*'
+
+#output
+#output a line containing each full file name
+#only if the file's name's last component doesn't follow the guidelines
+#D/file_that_doesnt_follow_guidelines
+#D/dir_that_doesnt_follow_guidelines/
+#no duplicates even if it fails multiple tests
+
+
+#---------------non recursive block------------
+#this block of code could be a function
+#get all immediate filenames and print the ones that have invalid characters
+#find all immediate and valid filenames and print the duplicates
+check() {
+	#get directory
+	local D=$1
+
+	#get files and directories in D
+	local C=$(ls -A -p -1 "$D")
+
+	if [ $? -ne 0 ]; then
+                echo "previous command failed with code $?" >&2
+                exit 6
+	fi
+
+	#check if the directory ends in a /
+	if [ "${D: -1}" != '/' ]; then
+		D+="/"
+	fi
+
+	######PART 1#####
+	#file name component must only contain
+	#ASCII letters, '.','-','_'
+	#not be empty
+	#not include '/'
+	#no numbers
+	#no symbols other than before mentioned
+	
+	local pname="$(echo "${C}" | grep -E "[^A-Za-z._/-]")"
+	
+#	echo "$pname"
+#	echo "==="
+
+	#####PART 2#####
+	#file name cannot start with '-'
+	#####PART 3#####
+	#file cannot start with '.'
+	#except for '.' and '..'
+
+	pname+=$'\n'
+	pname+="$(echo "$C" | grep -E "^[.-]")"
+
+#	echo "$pname"
+#	echo "==="
+	
+	#####PART 4#####
+	#file name component cannot be longer than 14 chars
+
+	pname+=$'\n'
+	pname+="$(echo "$C" | grep -E "[^/]{15,}")"
+
+#	echo "$pname"
+#	echo "==="
+
+	#####PART 5#####
+	#no two files can not have the same name 
+	#even if they just differ in case
+	
+	pname+=$'\n'	
+	pname+="$(echo "$C" | sort -f | uniq -D -i)"
+
+#	echo "$pname"
+#	echo "==="
+
+	echo "$pname" |
+	
+	#remove empty lines
+
+	sed '/^$/d' |
+
+	#put the directory in the begining
+
+	sed 's,^,'"$D"',' |
+
+	#sort and remove duplicates
+
+	sort -u
+}
+
+#------if statements and case statements---------
+# -r passed? (use shift command here)
+recursion=false;
+if [ "$1" == "-r" ]; then
+	recursion=true;
+	shift
+fi
+#was a start directory passed as an argument?
+D=$1; #set D as the directory name
+
+if [ $# -eq 0 ]; then
+	#no args so set D=.
+	D="."
+fi
+
+if [ ! -d $D ]; then
+		>&2 echo "$D is not a directory"
+	exit 1
+fi
+#is the start directory valid? If not, print to stderr and exit
+if [ -L $D ]; then
+        >&2 echo "$D is a symbolic link"
+        exit 2
+fi
+
+if [ ! -r $D ]; then
+	>&2 echo "$D is not readable"
+	exit 0
+fi
+
+if [ $(echo $D | head -c 1) == "-" ]; then
+	>&2 echo "$D cannot start with a '-'"
+	exit 3
+fi
+#wrong usage or wrong number of arguments? -> print to stderr and exit
+if [ $# -gt 1 ]; then
+        >&2 echo "$# is too many arguments"
+        exit 4
+fi
+#---------------recursion check------------------
+#this block of code checks for recursion:
+#if recursion -> run recursion statement
+#else -> run non-recursive block
+if [ $recursion == false ]; then
+	check $D
+else
+	export -f check
+
+	#find readable directories
+	#then run check on each one
+
+	find "$D" -type d -readable 2>/dev/null -exec sh -c 'check "$1"' sh {} \; 
+
+fi

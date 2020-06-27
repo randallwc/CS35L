@@ -1,0 +1,212 @@
+key1
+
+Exercise 1.1
+
+1.	C-x C-f e x e r 1 . h t m l Enter
+
+2.	C-s H T M L Enter
+
+3.	C-s s c a v e n g e r Enter M-b
+
+4.	C-s s e l f - r e f e r e n t i a l Enter M-b M-b
+
+5.	C-s a r r o w Enter M-b
+
+6.	C-e
+
+7.	C-a
+
+8.	Yes you can move to the end of the line with C-e
+	and you can move to the begining of the line with C-a
+
+9.	no
+
+10.	C-x C-c y 
+
+Exercise 1.2
+
+1.	C-x C-f e x e r 2 . h t m l Enter
+
+2.	M-g M-g 19 Enter C-k
+
+3.	C-s D E L E T E Enter C-a C-k
+
+4.	C-s w i k i p C-s Enter C-u 3 C-k
+ 
+5.	C-s < ! - - Enter C-r < C-u 7 C-d C-s < ! Enter C-a C-u 4 C-k C-s < ! C-a C-k
+
+6.	C-x C-c y 
+
+Exercise 1.3
+
+1.	C-x C-f e x e r 3 . h t m l Enter
+
+2.	C-s A s s i g n m e n t SP 1 M-% A s s i g n m e n t SP 4 2 Enter y y N
+
+3.	M-< C-s U T F - 8 M-% U S - A S C I I Enter y N
+
+4.	M-< C-M-s [^[:ascii]] C-a C-k
+	C-u 3 C-M-s
+	C-a C-k
+	C-u 2 C-M-s
+	C-a C-k
+
+5.	M-< C-s < / o l > C-o
+
+6.	C-x C-s y
+
+Exercise 1.4 
+
+4a	M-> C-r < C-SP C-e M-w M-g g 448 C-y
+
+b	M-> C-r < ! C-r C-SP C-u 3 C-n C-e M-w M-g g 431 C-y C-o
+
+c	M-> C-r < ! C-r C-r C-SP C-u 7 C-f M-w M-g g 430 C-e C-u 5 C-b C-y
+
+d	M-> C-r < ! C-r C-r C-r C-x SP C-e C-n C-e C-n M-w M-g g 386 C-u 3 C-o C-n C-y
+
+e	M-> C-r < ! C-r C-r C-r C-r C-SP C-e M-w M-g g 131 C-y
+
+f	M-> C-r < ! - - SP d C-SP C-e M-w M-g g 19 C-y
+
+5.	C-s - - - SP e C-a C-SP M-> C-w
+
+6.	C-_
+
+7.	M-> - - > C-r - - - SP Enter < ! - - C-o
+
+8.	M-< C-s < o l >  M-% < o L > Enter y y y y y y y
+
+	I found 7 instances.
+
+Exercise 1.5
+
+1.	C-x d Enter + j u n k Enter
+
+2.	C-x d j u n k Enter C-x C-f h e l l o . c 
+
+	#include <stdio.h>
+	int
+	main (void)
+	{
+	  int c = getchar ();
+	  if (c < 0)
+	    {
+	      if (ferror (stdin))
+		perror ("stdin");
+	      else
+		fprintf (stderr, "EOF on input\n");
+	      return 1;
+	    }
+	  if (putchar (c) < 0 || fclose (stdout) != 0)
+	    {
+	      perror ("stdout");
+	      return 1;
+	    }
+	  return 0;
+	}
+
+	C-x C-s
+	
+3.	M-x c o m p i l e Enter 
+
+	C-SP C-a Delete g c c SP h e l l o . c SP - o SP . / h e l l o Enter	
+
+4.	C-x b h e l l o - o u t Enter
+	
+	C-u M-! . / h e l l o Enter
+
+	C-SP M-> M-w C-x C-f k e y 1 . t x t Enter M-> C-y
+	
+	=output=
+	EOF on input
+	========
+
+	C-x C-c y
+
+Exercise 1.6
+
+1.	C-x b Enter
+
+2.	m o s t - n e g a t i v e - f i x n u m C-j
+
+	=result=
+	-2305843009213693952
+	========
+
+	m o s t - p o s i t i v e - f i x n u m C-j
+
+	=result=
+	2305843009213693951
+	=======
+	
+	( f o r m a t SP " % x " SP  -2305843009213693952 ) C-j
+
+	=result=
+	"2000000000000000"
+	========
+
+	( f o r m a t SP " % x " SP 2305843009213693951 ) C-j
+	
+	=result=
+	"1fffffffffffffff"
+	========
+
+	An explanation for these numbers is that emacs uses signed two's compliment numbers
+	that are 62 bits long with the 62nd (top) bit being the signed bit.
+
+3.	( r a n d o m SP " 8 0 5 - 1 6 7 - 9 8 6 " ) C-j
+
+	=result=	
+	-1342496702880826863
+	========
+	
+4.	( s e t q SP x SP ( r a n d o m ) ) C-j
+	
+	=result=
+	116808212561015801
+	========
+
+	( s e t q SP y SP ( r a n d o m ) ) C-j
+
+	=result=
+	2282377762271026124
+	========
+
+5.	( * SP x SP y ) C-j
+
+	=result=
+	-2168191234100892308
+	========
+
+	( s e t q SP p SP ( * SP x SP y ) ) C-j
+
+        =result=
+        p = -2168191234100892308
+        ========
+
+	( s e t q SP r SP ( l o g i o r SP p SP m o s t - n e g a t i v e - f i x n u m ) )  C-j
+
+	=res=
+	r = -2168191234100892308
+	===
+	
+6.	The mathematically correct value of x*y here is 266600466799889609434797588047785324
+	which is not r.
+
+7.	No they are not random they could be all intergers representable in Lisp
+	which are numbers between most-negative-fixnum and most-positive-fixnum.
+
+	They are also psudo random based off a seed from your system.
+	
+	C-h b r a n d o m Enter 
+	
+8.	If random was truely random and we still have the overflow posibility in emacs
+	there is almost a 100% chance that this product will overflow and be incorrect.
+
+	This is because there are an infinite ammount of numbers(intergers in this case)
+	that could be x or y and there is a much higher chance that those numbers will be outside
+	of the range that emacs can handle and will therefore there is a high chance that the
+	result will overflow and be incorrect.
+	
+

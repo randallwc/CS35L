@@ -1,0 +1,390 @@
+<!DOCTYPE html>
+<html lang='en'>
+<head>
+<title>Assignment 3. Shell scripting</title>
+<meta charset='UTF-8'>
+<link rel='author' href='mailto:eggert@cs.ucla.edu'>
+<link rel='license' href='copyright.html'>
+</head>
+
+<body>
+
+<h1>Assignment 3. Shell scripting</h1>
+
+<section>
+<h2>Laboratory: Spell-checking Hawaiian</h2>
+
+<p>Keep a log in the file <samp>lab3.log</samp> of what you do in the
+lab so that you can reproduce the results later. This should not
+merely be a transcript of what you typed: it should be more like a
+true lab notebook, in which you briefly note down what you did and
+what happened.</p>
+
+<p>For this laboratory assume you’re in the standard C or <a
+href='http://en.wikipedia.org/wiki/POSIX'>POSIX</a> <a
+href='http://pubs.opengroup.org/onlinepubs/9699919799/basedefs/V1_chap07.html#tag_07'>locale</a>. The
+shell command <a
+href='http://pubs.opengroup.org/onlinepubs/9699919799/utilities/locale.html'><samp>locale</samp></a>
+should output <samp>LC_CTYPE="C"</samp>
+or <samp>LC_CTYPE="POSIX"</samp>. If it doesn’t, use the following
+shell command:</p>
+
+<pre><samp><a href='http://pubs.opengroup.org/onlinepubs/9699919799/utilities/V3_chap02.html#export'>export</a> LC_ALL='C'
+</samp></pre>
+
+<p>and make sure <samp>locale</samp> outputs the right thing afterwards.</p>
+
+<p>We also assume the file <samp>words</samp> contains a sorted list of
+English words. Create such a file by sorting the contents of the file
+<samp>/usr/share/dict/words</samp> on the SEASnet GNU/Linux hosts, and putting
+the result into a file named <samp>words</samp> in your working
+directory. To do that, you can use
+the <samp><a href='http://pubs.opengroup.org/onlinepubs/9699919799/utilities/sort.html'>sort</a></samp>
+command.</p>
+
+<p>Then, using <a href='http://www.gnu.org/software/wget/'>Wget</a> to obtain a copy of this assignment’s HTML web page as a text file, run the following commands with that
+text file being standard input. Describe generally what each command
+outputs (in particular, how its output differs from that of the
+previous command), and why.</p>
+
+<pre><samp>tr -c 'A-Za-z' '[\n*]'
+tr -cs 'A-Za-z' '[\n*]'
+tr -cs 'A-Za-z' '[\n*]' | sort
+tr -cs 'A-Za-z' '[\n*]' | sort -u
+tr -cs 'A-Za-z' '[\n*]' | sort -u | comm - words
+tr -cs 'A-Za-z' '[\n*]' | sort -u | comm -23 - words # ENGLISHCHECKER
+</samp></pre>
+
+<p>Let’s take the last command (marked ENGLISHCHECKER)
+as the crude implementation of an
+English spelling checker. Suppose we want to change ENGLISHCHECKER to be a
+spelling checker for
+<a href='http://en.wikipedia.org/wiki/Hawaiian_language'>Hawaiian</a>,
+a language whose traditional orthography
+has only the following
+letters (or their capitalized equivalents):</p>
+
+<pre><samp>p k ' m n w l h a e i o u
+</samp></pre>
+
+<p>In this lab for convenience we use ASCII apostrophe (') to
+represent the Hawaiian &#8216;okina (&#8216;); it has no capitalized
+equivalent.</p>
+
+<p>We will now create a simple Hawaiian
+dictionary containing a copy of all the Hawaiian words in
+the tables in
+“<a href='https://www.mauimapp.com/moolelo/hwnwdshw.htm'>Hawaiian to English</a>”, an introductory list of words.
+Use <a href='http://www.gnu.org/software/wget/'>Wget</a> to obtain
+your copy of that web page.
+Extract these words systematically from the tables in “Hawaiian to English”.
+Remove all instances of ‘<samp>?</samp>’, ‘<samp>&lt;u&gt;</samp>’ and
+‘<samp>&lt;/u&gt;</samp>’.
+For each remaining line of the form
+‘<samp><var>A</var>&lt;td<var>X</var>&gt;<var>W</var>&lt;/td&gt;<var>Z</var></samp>’,
+where <var>A</var> and <var>Z</var> are zero or more spaces,
+<var>X</var> contains no ‘<samp>&gt;</samp>’ characters
+and <var>W</var> consists of entirely Hawaiian characters or spaces,
+assume that <var>W</var> contains one or more nonempty Hawaiian words
+and extract those words; each word is a maximal sequence of one or
+more Hawaiian characters.
+Treat upper case letters as if they were lower case, treat
+<samp>`</samp> (ASCII grave accent) as if it were <samp>'</samp>
+(ASCII apostrophe, which we use to represent &#8216;okina), and treat ‘<samp>-</samp>’ as if it were a space ‘<samp> </samp>’.
+For example, the entry ‘<samp>H&lt;u&gt;a&lt;/u&gt;`ule lau</samp>’
+contains the two words
+‘<samp>ha'ule</samp>’ and ‘<samp>lau</samp>’, and the entry ‘<samp>Hala-kahiki</samp>’ contains the two words ‘<samp>hala</samp>’ and ‘<samp>kahiki</samp>’.
+Sort the resulting list of words, removing any duplicates.
+Do not attempt to repair any remaining problems by hand; just use the
+systematic rules mentioned above. Automate the systematic rules
+into a shell script <samp>buildwords</samp>, which you should also copy into your
+log; it should read the HTML web page from standard input and write a sorted list of
+unique words to standard output. For example, we should be able to run this
+script with a command like this:</p>
+
+<pre><samp>cat hwnwdshw.htm | ./buildwords | less
+</samp></pre>
+
+<p>If the shell script has bugs and
+doesn’t do all the work, your log should record in detail each bug
+it has.</p>
+
+<p>Note, some English words consist entirely of Hawaiian letters (e.g. <samp>pineapple</samp>, <samp>man</samp>, <samp>help</samp>). To keep things simple, treat these words as Hawaiian words that the script can extract.</p>
+
+<p>Save the output of <samp>buildwords</samp> in a file named <samp>hwords</samp>. From the ENGLISHCHECKER command, derive a shell command
+HAWAIIANCHECKER that checks the
+spelling of Hawaiian rather than English, under the assumption
+that <samp>hwords</samp> is a Hawaiian dictionary and that every
+maximal nonempty sequence of ASCII letters or apostrophe from the input is intended
+to be a Hawaiian word and needs its spelling checked. Input that
+is upper case should be lower-cased before it is checked against the
+dictionary, since the dictionary is in all lower case.</p>
+
+<p>Check your work by running your Hawaiian spelling checker on
+<a href='assign3.html'>this very web page</a> (which you should also
+fetch with Wget), and on the Hawaiian dictionary <samp>hwords</samp>
+itself. Count the number of distinct misspelled words on this very web
+page, using both ENGLISHCHECKER and HAWAIIANCHECKER. Count the number
+of distinct words on this very web page that ENGLISHCHECKER reports as
+misspelled but HAWAIIANCHECKER does not, and give two examples of
+these words.  Similarly, count the number of distinct words (and give
+two examples) that HAWAIIANCHECKER reports as misspelled on this very
+web page but ENGLISHCHECKER does not.</p>
+</section>
+
+<section>
+<h2>Homework: Find poorly-named files</h2>
+
+<p><em>Warning: it will be difficult to do this homework without
+  attending the lab session for hints.</em></p>
+
+<p>You’re working in a project that has lots of files and
+  is intended to be portable to a wide variety of systems,
+  some of which have fairly-restrictive rules for file names.
+  Your project has established the following portability guidelines:</p>
+
+<ol>
+  <li>A file name component must contain only ASCII
+    letters, ‘<samp>.</samp>’, ‘<samp>-</samp>’, and ‘<samp>_</samp>’.
+    A <dfn>file name component</dfn> is a nonempty part of a file name
+    that is a maximal sequence of characters other than ‘<samp>/</samp>’;
+    for example, the file name ‘<samp>/usr/lib64/libstdc++.so.6</samp>’ has the
+    three components ‘<samp>usr</samp>’, ‘<samp>lib64</samp>’,
+    and ‘<samp>libstdc++.so.6</samp>’, where the second component violates this guidline due to the digits ‘<samp>6</samp>’ and ‘<samp>4</samp>’ and the last component’s
+    two ‘<samp>+</samp>’ characters and the ‘<samp>6</samp>’ digit violate this guideline.</li>
+  <li>A file name component cannot start with ‘<samp>-</samp>’.</li>
+  <li>Except for ‘<samp>.</samp>’ and ‘<samp>..</samp>’,
+    a file name component cannot start with ‘<samp>.</samp>’.</li>
+  <li>A file name component must not contain more than 14 characters.</li>
+  <li>No two files in the same directory can have names that
+    differ only in case.  For example, if a directory contains a file
+    ‘<samp>St._Andrews</samp>’ it cannot also contain a file
+    name ‘<samp>st._anDrEWS</samp>’.</li>
+</ol>
+
+<p>Your boss has given you the job of looking for projects that do not
+  follow these guidelines. Write a shell script <samp>poornames</samp>
+  that accepts a project’s directory name <var>D</var> as an operand
+  and looks for violations of one or more of the guidelines in files
+  under <var>D</var>. There are two parts to this assignment:
+  first, you need to write a basic <samp>poornames</samp> script,
+  and second, you need to extend <samp>poornames</samp> to make
+  it recursive.</p>
+
+<h3>Basic <samp>poornames</samp></h3>
+
+<p>In its basic form, when given one operand <var>D</var>,
+  <samp>poornames</samp> should look for violations in <var>D</var>’s
+  directory entries (i.e., in files immediately under <var>D</var>).
+  If <var>D</var> is not the name of a directory,
+  <samp>poornames</samp> should diagnose the problem, output an error message on stderr, and exit
+  with a failure status.
+  (If <var>D</var> is a symbolic link, <samp>poornames</samp> should
+  not follow the symbolic link, and should treat it as an error
+  just like any other non-directory.)
+  When given no operands, <samp>poornames</samp> should act as
+  if <var>D</var> is ‘<samp>.</samp>’, the current working directory.
+  When given two or more operands, or a single operand whose first
+  character is ‘<samp>-</samp>’,
+  <samp>poornames</samp> should diagnose the problem, output an error message on stderr, and exit
+  with a failure status.
+  If <samp>poornames</samp> encounters an error when examining a directory
+  (e.g., lack of permissions to read the directory) it should diagnose
+  the problem and output an error message on stderr, but it need not exit with a failure status.</p>
+
+<p>The <samp>poornames</samp> script should output a
+  line containing each full file name if and only if the file name’s
+  last component does not follow the guidelines.
+  The full file name should start with <var>D</var>, followed by
+  ‘<samp>/</samp>’ if <var>D</var> does not already end in
+  ‘<samp>/</samp>’, followed by the file name component that does not
+  follow the guidelines, and finally followed by a trailing
+  ‘<samp>/</samp>’ if the named file is a directory.
+  The <samp>poornames</samp> script should not output duplicate lines.
+  The order of output lines does not matter.</p>
+
+<p>The <samp>poornames</samp> script should work with file names whose
+components contain special characters like spaces, ‘<samp>*</samp>’, and leading
+‘<samp>-</samp>’ (except that <var>D</var> itself cannot begin with
+‘<samp>-</samp>’). However, you need not worry about file names
+containing newlines.
+</p>
+
+<p>Your script should be runnable as an ordinary user, and should
+run on the SEASnet GNU/Linux hosts; please see
+its <a href='http://pubs.opengroup.org/onlinepubs/9699919799/idx/utilities.html'>list
+of utilities</a> for the commands that your script may use. (Hint: see
+the <samp>find</samp> and <samp>sort</samp>
+utilities.)</p>
+
+<p>To illustrate, assume we have a directory named <samp>source</samp> that contains the following directory entries (i.e., the files immediately under <samp>source</samp>):</p>
+<pre><samp>   ans1.c
+   ANS1.c
+   *prog*.c
+   .hidden
+   st._anDrEWS
+   goodFile
+   sub dir
+   St._Andrews
+</samp></pre>
+<p>Here, ‘<samp>sub dir</samp>’ is a directory. If we run this command:</p>
+
+<pre><samp>poornames source</samp></pre>
+
+<p>this is the expected output (output order does not matter):</p>
+<pre><samp>   source/ans1.c
+   source/ANS1.c
+   source/*prog*.c
+   source/.hidden
+   source/st._anDrEWS
+   source/sub dir/
+   source/St._Andrews
+</samp></pre>
+
+<p>Note, <samp>ans1.c</samp> violates two guidlines (contains an invalid character ‘<samp>1</samp>’ and has a counterpart file <samp>ANS1.c</samp> that differs only in case) but is printed in the output only once.</p>
+
+<h3>Recursive <samp>poornames</samp></h3>
+
+<p>Once you’ve implemented the basic form, extend
+  <samp>poornames</samp> so that it optionally runs recursively.
+  When given an ‘<samp>-r</samp>’ option-argument,
+  recursive <samp>poornames</samp> should look recursively at every
+  directory entry in every directory under <var>D</var>, including
+  <var>D</var> itself.</p>
+
+<p> Any ‘<samp>-r</samp>’ option-argument must
+  precede any <var>D</var> operand, and at most one option-argument
+  (i.e., argument beginning with ‘<samp>-</samp>’)
+  can be given; otherwise <samp>poornames</samp> should report the
+  problem on standard error and exit with a failure status.</p>
+
+<p>Recursive <samp>poornames</samp> should not follow symbolic links
+  when recursively looking for poorly-named files. However, it should
+  check the symbolic links’ names, just as it checks the names of
+  all other files.</p>
+
+<p>If a subdirectory name violates the guidelines, <samp>poornames</samp>
+  should report the name, but this should not affect whether names
+  of files under the subdirectory are also reported.</p>
+
+<p>Although basic ‘<samp>poornames -r</samp>’ should report an error
+  and exit with a failure status, recursive ‘<samp>poornames
+  -r</samp>’ should behave like ‘<samp>poornames -r .</samp>’ and
+  recurse through the working directory. The grader should be able to
+  use use the behavior of ‘<samp>poornames -r</samp>’ to test whether
+  you have attempted to do recursive <samp>poornames</samp>, or just
+  basic <samp>poornames</samp>.</p>
+
+<h3>Testing <samp>poornames</samp></h3>
+
+<p>Here are some simple tests to try, but you should not limit
+  yourself to just these tests.</p>
+
+<p>The command ‘<samp>poornames /usr/bin</samp>’ should output a line
+  ‘<samp>/usr/bin/&lbrack;</samp>’ because the <samp>/usr/bin</samp>
+  directory contains a file <samp>&lbrack;</samp> that contains a
+  character that falls outside the guidelines.  The same command
+  should also output the lines ‘<samp>/usr/bin/head</samp>’ and
+  ‘<samp>/usr/bin/HEAD</samp>’ if both files exist, because the
+  directory entries <samp>head</samp> and <samp>HEAD</samp> fall
+  outside the guidelines (either entry alone would be OK, but the
+  presence of both entries mean that both are invalid). The command
+  ‘<samp>poornames /usr/share/locale</samp>’ should output the line
+  ‘<samp>/usr/share/locale/en@quot/</samp>’ if that directory exists,
+  because ‘<samp>@</samp>’ is not one of the allowed characters.</p>
+
+<p>The commands ‘<samp>poornames /usr/lib</samp>’
+  and ‘<samp>poornames -r /usr/lib</samp>’
+  should both output ‘<samp>/usr/lib/libstdc++.so.6</samp>’ if it exists,
+  because ‘<samp>+</samp>’ and ‘<samp>6</samp>’ are characters that are not allowed;
+  ‘<samp>poornames -r /usr/lib</samp>’ should also output the lines
+  ‘<samp>/usr/lib/firmware/radeon/hawaii_ce.bin</samp>’ and
+  ‘<samp>/usr/lib/firmware/radeon/HAWAII_ce.bin</samp>’ if those two
+  files exist, because these two directory entries in
+  <samp>/usr/lib/firmware/radeon</samp> are the same if case is ignored.</p>
+
+<p>To illustrate the rules for subdirectories, suppose</p>
+<pre><samp>   d/a
+   d/a/b
+   d/a/B
+   d/a/c
+   d/a/C
+   d/A
+   d/A/b
+</samp></pre>
+<p>are all directories,
+  <samp>d/a/C</samp> is a file, and no other files exist. Then
+  ‘<samp>poornames -r d</samp>’ should output lines</p>
+<pre><samp>   d/a/
+   d/a/b/
+   d/a/B/
+   d/A/
+   d/a/c/
+   d/a/C
+</samp></pre>
+<p>not necessarily in that order; it should not output ‘<samp>d/A/b/</samp>’
+  because <samp>d/A/b</samp> does not violate any guideline.</p>
+
+<p>When testing your script, it is a good idea to do the testing in a
+subdirectory devoted just to testing.  This will reduce the likelihood
+of messing up your home directory or main development directory if
+your script goes haywire.</p>
+
+<p>Once your script passes your initial tests, try it out as follows:</p>
+<pre><samp>   poornames    /usr/bin   > bin.1     2> bin.2
+   poornames -r /usr/bin   > bin-r.1   2> bin-r.2
+   poornames    /usr/lib   > lib.1     2> lib.2
+   poornames -r /usr/lib   > lib-r.1   2> lib-r.2
+   poornames    /usr/share > share.1   2> share.2
+   poornames -r /usr/share > share-r.1 2> share-r.2
+</samp></pre>
+<p>
+  on the SEASnet GNU/Linux
+  host <samp>lnxsrv07</samp>. Save the twelve output files
+  generated by the above commands.</p>
+</section>
+
+<section>
+<h2>Submit</h2>
+
+<p>Submit the following files (WITH THE EXACT FILE NAMES).</p>
+<ul>
+
+<li>The script <samp>buildwords</samp> as described in the lab.</li>
+
+<li>The file <samp>lab3.log</samp> as described in the lab.</li>
+
+<li>The <samp>poornames</samp> script described in the homework.</li>
+
+<li>The twelve test output files described in the homework.</li>
+</ul>
+
+<p><em>Warning: You should edit your files with Emacs or with other
+    editors that end lines with plain LF (i.e., newline
+    or <samp>'\n'</samp>).</em> Do not use Notepad or similar tools
+    that may convert line endings
+    to <a href='https://en.wikipedia.org/wiki/CRLF'>CRLF</a> form.</p>
+
+<p>All files should be ASCII text files, with no
+carriage returns, and with no more than 80 columns per line (except possibly
+for the test output files). The shell
+command:</p>
+
+<pre><samp>awk '/\r/ || 80 &lt; length' buildwords lab3.log poornames
+</samp></pre>
+
+<p>should output nothing.</p>
+</section>
+
+<footer>
+<hr>
+<small>
+ &copy; 2005, 2007, 2008, 2010, 2013, 2019, 2020 Paul Eggert.
+ See <a href='../copyright.html'>copying rules</a>.<br>
+
+ $Id: assign3.html,v 1.35 2020/04/10 17:38:50 eggert Exp $
+</small>
+</footer>
+
+</body>
+</html>

@@ -1,0 +1,49 @@
+--- exer1.html	2020-01-06 09:55:58.000000000 -0800
++++ exer2.html	2020-04-06 18:38:54.442732000 -0700
+@@ -16,7 +16,7 @@
+ <section>
+ <h2>Laboratory: Linux and Emacs scavenger hunt</h2>
+ 
+-<!-- diff，在UNIX系統上的一個工具程式，它可以比較兩個檔案之間的不同。通常它被用來比較同一個檔案，在不同版本間的差異。它可以產生一個擴展名為.diff或.patch的檔案，這個檔案可以被另一個工具程式patch來使用。-->
++
+ 
+ <p>Instructions: Do this assignment on the SEASnet GNU/Linux servers
+ <samp>lnxsrv06</samp>, <samp>lnxsrv07</samp>,
+@@ -128,7 +128,7 @@
+ <section>
+ <h2>Homework: Learning to use Emacs</h2>
+ 
+-<!-- DELETE-ME DELETE-ME DELETE-ME -->
++
+ 
+ <ul>
+  <li>Keith Waclena, <a
+@@ -384,9 +384,6 @@
+ <section>
+ <h2>Submit</h2>
+ 
+-<!-- You can learn more about HTML comments at
+-	<https://en.wikipedia.org/wiki/HTML_comment#Comments>.
+-	-->
+ 
+ <p>Submit the following two files, in either plain-text or Org format
+ (your choice).</p>
+@@ -430,11 +427,7 @@
+ <samp>LC_ALL=C awk '/[^\t\f -~]/' key1.txt ans1.txt #</samp> <em>(if you submit .txt files)</em>
+ </pre>
+ 
+-<p>should output nothing<!---->.</p>
+-<!--
+-<p>Or maybe more lines, if something has gone wrong.</p>
+--<->-
+--->
++<p>should output nothing.</p>
+ </section>
+ 
+ <footer>
+@@ -452,4 +445,4 @@
+ 
+ </body>
+ </html>
+-<!-- end of HTML resource -->
++

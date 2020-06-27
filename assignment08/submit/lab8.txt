@@ -1,0 +1,379 @@
+William Randall
+lab8.txt
+
+///// part 1 /////
+I got a copy of the git repo
+
+$ git clone https://git.savannah.gnu.org/git/diffutils.git
+
+///// part 2 /////
+I moved into diffutils and then ran this command to get a log
+of the changes to diffutils' master branch
+
+$ git log > git-log.txt
+
+///// part 3 /////
+To generate a list of tags I used the following command
+
+$ git tag > git-tags.txt
+
+///// part 4 /////
+
+To find the part of git-log.txt that contained "maint: quote 'like this' or "like this", not `like this'"
+I opened the file in emacs and searched for it
+
+$ emacs git-log.txt
+C-s maint: quote 'like this' or "like this", not `like this'
+
+From this I found the following
+
+===git-log.txt===
+...
+commit 62ca21c8c1a5aa3488589dcb191a4ef04ae9ed4f
+Author: Paul Eggert <eggert@cs.ucla.edu>
+Date:   Wed Jan 25 23:46:16 2012 -0800
+...
+===end===
+
+C-x C-c
+
+Then to make a patch for this comit I used the following commands
+
+$ git format-patch -1 --stdout 62ca21c8c1a5aa3488589dcb191a4ef04ae9ed4f > quote-patch.txt
+
+'format-patch' makes the patch file
+'-1' designates only one comit for the patch file
+'--stdout' pipes the output into stdout instead of a patch file
+Then I redirected that into a file called quote-patch.txt
+
+///// part 5 /////
+
+To check out version 3.0 I used the following command to find it in git-log.txt
+
+$ emacs git-log.txt
+C-s version 3.0
+
+which gave me the following information
+
+===git-log.txt===
+...
+commit 022cd5c5eb647a22a4daa5fe5cbc10af6d5a1112
+Author: Jim Meyering <meyering@redhat.com>
+Date:   Mon May 3 18:49:55 2010 +0200
+...
+===end===
+
+C-x C-c
+
+Then I used the following command to check out version 3.0
+
+$ git checkout 022cd5c5eb647a22a4daa5fe5cbc10af6d5a1112
+
+///// part 6 /////
+
+To apply the patch I ran the following command
+
+$ patch -p1 < quote-patch.txt
+
+===output===
+can't find file to patch at input line 62
+Perhaps you used the wrong -p or --strip option?
+...
+Hunk #1 FAILED at 9.
+Hunk #3 FAILED at 60.
+2 out of 3 hunks FAILED -- saving rejects to file README.rej
+patching file README-hacking
+Hunk #1 FAILED at 19.
+1 out of 1 hunk FAILED -- saving rejects to file README-hacking.rej
+...
+Hunk #1 FAILED at 29.
+1 out of 1 hunk FAILED -- saving rejects to file cfg.mk.rej
+...
+can't find file to patch at input line 249
+Perhaps you used the wrong -p or --strip option?
+...
+can't find file to patch at input line 262
+Perhaps you used the wrong -p or --strip option?
+...
+Hunk #10 FAILED at 876.
+Hunk #11 FAILED at 906.
+Hunk #12 FAILED at 942.
+...
+Hunk #6 FAILED at 433.
+...
+===end===
+
+Each time I was prompted to enter a file to patch I pressed enter.
+
+These errors occured because I assume the patch was not made
+for version 3.0 of diffutils.
+Therefore the errors occur where the version the patch was made for
+differs from version 3.0.
+
+///// part 7 /////
+
+$ git status
+
+===output===
+HEAD detached at 022cd5c
+Changes not staged for commit:
+  (use "git add <file>..." to update what will be committed)
+  (use "git restore <file>..." to discard changes in working directory)
+	modified:   NEWS
+	modified:   README
+	modified:   TODO
+	modified:   doc/diagmeet.note
+	modified:   ms/config.bat
+	modified:   ms/config.site
+	modified:   po/en.po
+	modified:   src/analyze.c
+	modified:   src/cmp.c
+	modified:   src/context.c
+	modified:   src/diff.c
+	modified:   src/diff.h
+	modified:   src/diff3.c
+	modified:   src/dir.c
+	modified:   src/ifdef.c
+	modified:   src/io.c
+	modified:   src/sdiff.c
+	modified:   src/side.c
+	modified:   src/system.h
+	modified:   src/util.c
+	modified:   tests/help-version
+
+Untracked files:
+  (use "git add <file>..." to include in what will be committed)
+	NEWS.orig
+	README-hacking.orig
+	README-hacking.rej
+	README.orig
+	README.rej
+	cfg.mk.orig
+	cfg.mk.rej
+	git-log.txt
+	git-tags.txt
+	ms/config.site.orig
+	quote-patch.txt
+	src/cmp.c.orig
+	src/context.c.orig
+	src/diff.c.orig
+	src/diff.c.rej
+	src/diff.h.orig
+	src/diff3.c.orig
+	src/diff3.c.rej
+	src/dir.c.orig
+	src/sdiff.c.orig
+	src/system.h.orig
+	src/util.c.orig
+	tests/help-version.orig
+
+no changes added to commit (use "git add" and/or "git commit -a")
+===end===
+
+From this we can see that there are 'changes not staged for comit', 
+which are files that have been changed by the patch, and there are
+'untracked files' which are files that have been created due to the 
+patch. 
+
+///// part 8 /////
+
+vc-diff (C-x v =)
+
+Display diffs between file revisions.
+
+vc-revert (C-x v u)
+
+Revert working copies of the selected fileset to their repository contents.
+
+diff-apply-hunk (C-c C-a)
+
+Apply this hunk to its target file. With a prefix argument of C-u, revert this hunk.
+
+diff-goto-source (C-c C-c)
+
+Go to the source file and line corresponding to this hunk.
+
+///// part 9 /////
+
+I opened the non .c files in emacs then ran the following commands on each
+
+$ emacs [file]
+C-x v u
+yes ENTR
+C-x C-c
+
+===files===
+NEWS
+README
+TODO
+doc/diagmeet.note
+ms/config.bat
+ms/config.site
+po/en.po
+src/diff.h
+src/system.h
+tests/help-version
+===end===
+
+I opened the .c files in emacs and reverted all changes except the ones dealing with
+character string constants with the following commands.
+
+# emacs [file]
+C-x v =
+C-u C-c C-a	this will revert the hunk
+
+===files===
+src/analyze.c	all reverted
+src/cmp.c	36, 364, 377
+src/context.c	all reverted
+src/diff.c	40, 57, 92
+src/diff3.c	35, 159, 1475
+src/dir.c	87, 125, 234
+src/ifdef.c	all reverted
+src/io.c	all reverted
+src/sdiff.c	35, 92, 747
+src/side.c	all reverted
+src/util.c	27, 121, 146, 190, 241, 270, 650
+===end===
+
+///// part 10 /////
+
+$ find src/*.c.rej
+
+===output===
+src/diff.c.rej
+src/diff3.c.rej
+===end===
+
+===src/diff3.c.rej===
+--- src/diff3.c
++++ src/diff3.c
+...
+-  N_("-i                          append `w' and `q' commands to ed scripts"),
++  N_("-i                          append 'w' and 'q' commands to ed scripts"),
+...
+===end===
+
+===src/diff.c.rej===
+--- src/diff.c
++++ src/diff.c
+...
+-  N_("-l, --paginate                pass output through `pr' to paginate it"),
++  N_("-l, --paginate                pass output through 'pr' to paginate it"),
+...
+-  N_("-D, --ifdef=NAME                output merged file with `#ifdef NAME' diffs"),
++  N_("-D, --ifdef=NAME                output merged file with '#ifdef NAME' diffs"),
+...
+-  N_("  LTYPE is `old', `new', or `unchanged'.  GTYPE is LTYPE or `changed'."),
++  N_("  LTYPE is 'old', 'new', or 'unchanged'.  GTYPE is LTYPE or 'changed'."),
+...
+-  N_("FILES are `FILE1 FILE2' or `DIR1 DIR2' or `DIR FILE...' or `FILE... DIR'."),
++  N_("FILES are 'FILE1 FILE2' or 'DIR1 DIR2' or 'DIR FILE...' or 'FILE... DIR'."),
+...
+-  N_("If a FILE is `-', read standard input."),
++  N_("If a FILE is '-', read standard input."),
+...
+===end===
+
+I manually searched for each change that was rejected and changed the ` to '.
+
+///// part 11 /////
+
+I checked the untracked files with
+
+$ git status
+
+I then I moved the following files out of the working directory
+
+$ mv *.txt ..
+
+Then I ran the following command to remove untracked files
+
+$ git clean -f
+
+///// part 12 /////
+
+$ git status
+
+===output===
+HEAD detached at 022cd5c
+Changes not staged for commit:
+  (use "git add <file>..." to update what will be committed)
+  (use "git restore <file>..." to discard changes in working directory)
+	modified:   src/cmp.c
+	modified:   src/diff.c
+	modified:   src/diff3.c
+	modified:   src/dir.c
+	modified:   src/sdiff.c
+	modified:   src/util.c
+
+no changes added to commit (use "git add" and/or "git commit -a")
+===end===
+
+This contains 6 files which is correct.
+
+Then I made the patch and checked the lines
+$ git diff > quote-3.0-patch.txt
+
+$ wc -l < quote-3.0-patch.txt
+
+326 lines
+
+$ mv quote-3.0-patch.txt ..
+
+///// part 13 /////
+
+To build the modified version I ran the following commands
+
+$ ./bootstrap
+
+I'm on lnxsrv07 so I got the additional patch and applied it
+
+$ wget https://web.cs.ucla.edu/classes/spring20/cs35L/assign/diffutils-gets.diff
+
+I changed the first line from "old" to "lib"
+
+$ patch -p0 < diffutils-gets.diff
+
+$ ./configure
+$ make
+$ make check
+
+$ ./src/diff . -
+$ ./src/diff --help
+
+Both commands gave ' instead of `
+
+///// part 14 /////
+
+Make the directories
+$ mkdir ../diffutils-3.0-patch
+$ mkdir ../diffutils-3.0-old
+
+Clone the diffutils into 'diffutils-3.0-old'
+$ git clone ~eggert/src/gnu/diffutils ../diffutils-3.0-old
+$ cd ../diffutils-3.0-old
+
+Checkout the unmodified version of diffutils
+$ git checkout 022cd5c5eb647a22a4daa5fe5cbc10af6d5a1112
+
+Copy over the source files from the unmodified version
+$ cp ./src/*.c ../diffutils-3.0/
+
+Copy the patched files into 'diffutils-3.0-patch'
+$ cp ../diffutils/src/*.c ../diffutils-3.0-patch/
+
+$ cd ..
+
+Make Diff file
+$ diffutils/src/diff -pru diffutils-3.0 diffutils-3.0-patch > quote-3.0-test.txt
+
+///// part 15 /////
+
+$ diffutils/src/diff quote-3.0-patch.txt quote-3.0-test.txt > patch.diff
+
+The differences in the 'quote-3.0-patch.txt' and 'quote-3.0-test.txt'
+seem to be line numbers and paths, and they do not seem to be different in
+content. But the order seems to be different which could come from
+how the diff was made. Furthermore the diffutils diff cuts off some of the
+lines which should not be a problem when applying the diff file.

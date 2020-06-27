@@ -1,0 +1,146 @@
+--- exer1.html	2020-01-06 09:55:58.000000000 -0800
++++ exer4.html	2020-04-06 19:15:43.850452000 -0700
+@@ -43,7 +43,7 @@
+ introductions and tutorials.
+ </p>
+ 
+-<ol>
++<oL>
+ <li>
+ What shell command uses the <samp>man</samp> program
+ to print all the commands that have a specific
+@@ -162,7 +162,7 @@
+ <section>
+ <h3>Exercise 1.1: Moving around in Emacs</h3>
+ 
+-<ol>
++<oL>
+ <li>Use Emacs to edit the file <samp>exer1.html</samp>.</li>
+ <li>Move the cursor to just after the first occurrence of the word "HTML" (all upper-case).</li>
+ <li>Now move the cursor to the start of the first later occurrence of the word "scavenger".</li>
+@@ -184,7 +184,7 @@
+ <section>
+ <h3>Exercise 1.2: Deleting text in Emacs</h3>
+ 
+-<ol>
++<oL>
+ <li>Use Emacs to edit the file <samp>exer2.html</samp>. The idea is to
+ delete its HTML comments; the resulting page should display the same
+ text as the original.</li>
+@@ -214,7 +214,7 @@
+ <section>
+ <h3>Exercise 1.3: Inserting text in Emacs</h3>
+ 
+-<ol>
++<oL>
+ <li>Use Emacs to edit the file <samp>exer3.html</samp>.</li>
+ 
+ <li>Change the first two instances of "Assignment 1" to "Assignment 42".</li>
+@@ -239,7 +239,7 @@
+ that you should know, like copy and paste, search and replace, and undo.
+ </p>
+ 
+-<ol>
++<oL>
+ <li>Execute the command "<samp>cat exer2.html exer2.diff &gt;exer4.html</samp>"
+ to create a file <samp>exer4.html</samp> that contains a copy of <samp>exer2.html</samp> followed by a copy of <samp>exer2.diff</samp>.</li>
+ <li>Use Emacs to edit the file <samp>exer4.html</samp>.
+@@ -280,7 +280,7 @@
+ Do these tasks all within Emacs. Don't use a shell subcommand
+ if you can avoid it.</p>
+ 
+-<ol>
++<oL>
+ <li>Create a new directory named "<samp>junk</samp>" that's right under
+ your home directory.</li>
+ 
+@@ -330,7 +330,7 @@
+ <section>
+ <h3>Exercise 1.6: Running Elisp code</h3>
+ 
+-<ol>
++<oL>
+ <li>Visit Emacs's <samp>*scratch*</samp> buffer.</li>
+ 
+ <li>In the buffer, evaluate the two constants
+@@ -384,10 +384,10 @@
+ <section>
+ <h2>Submit</h2>
+ 
+-<!-- You can learn more about HTML comments at
+-	<https://en.wikipedia.org/wiki/HTML_comment#Comments>.
+-	-->
+-
++<!-- You can learn more about HTML comments at               
++       <https://en.wikipedia.org/wiki/HTML_comment#Comments>.
++       -->                                                   
++                                                             
+ <p>Submit the following two files, in either plain-text or Org format
+ (your choice).</p>
+ 
+@@ -432,9 +432,9 @@
+ 
+ <p>should output nothing<!---->.</p>
+ <!--
+-<p>Or maybe more lines, if something has gone wrong.</p>
+--<->-
+--->
++-<p>Or maybe more lines, if something has gone wrong.</p>
++--<->-
++--->
+ </section>
+ 
+ <footer>
+@@ -453,3 +453,52 @@
+ </body>
+ </html>
+ <!-- end of HTML resource -->
++--- exer1.html	2020-01-06 09:55:58.000000000 -0800
+++++ exer2.html	2020-04-06 16:22:02.389260000 -0700
++@@ -16,7 +16,7 @@
++ <section>
++ <h2>Laboratory: Linux and Emacs scavenger hunt</h2>
++ 
++-<!-- diff，在UNIX系統上的一個工具程式，它可以比較兩個檔案之間的不同。通常它被用來比較同一個檔案，在不同版本間的差異。它可以產生一個擴展名為.diff或.patch的檔案，這個檔案可以被另一個工具程式patch來使用。-->
+++
++ 
++ <p>Instructions: Do this assignment on the SEASnet GNU/Linux servers
++ <samp>lnxsrv06</samp>, <samp>lnxsrv07</samp>,
++@@ -128,7 +128,7 @@
++ <section>
++ <h2>Homework: Learning to use Emacs</h2>
++ 
++-<!-- DELETE-ME DELETE-ME DELETE-ME -->
+++
++ 
++ <ul>
++  <li>Keith Waclena, <a
++@@ -384,9 +384,6 @@
++ <section>
++ <h2>Submit</h2>
++ 
++-<!-- You can learn more about HTML comments at
++-	<https://en.wikipedia.org/wiki/HTML_comment#Comments>.
++-	-->
++ 
++ <p>Submit the following two files, in either plain-text or Org format
++ (your choice).</p>
++@@ -430,11 +427,7 @@
++ <samp>LC_ALL=C awk '/[^\t\f -~]/' key1.txt ans1.txt #</samp> <em>(if you submit .txt files)</em>
++ </pre>
++ 
++-<p>should output nothing<!---->.</p>
++-<!--
++-<p>Or maybe more lines, if something has gone wrong.</p>
++--<->-
++--->
+++<p>should output nothing.</p>
++ </section>
++ 
++ <footer>
++@@ -452,4 +445,4 @@
++ 
++ </body>
++ </html>-
++<!-- end of HTML resource -->
+++

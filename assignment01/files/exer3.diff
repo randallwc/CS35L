@@ -1,0 +1,43 @@
+--- exer1.html	2020-01-06 09:55:58.000000000 -0800
++++ exer3.html	2020-04-06 17:16:01.786336000 -0700
+@@ -1,17 +1,17 @@
+ <!DOCTYPE html>
+ <html lang='en'>
+ <head>
+-<title>Assignment 1. Getting to know your system</title>
+-<meta charset='UTF-8'>
++<title>Assignment 42. Getting to know your system</title>
++<meta charset='US-ASCII'>
+ <link rel='author' href='mailto:eggert@cs.ucla.edu'>
+ <link rel='license' href='copyright.html'>
+ </head>
+ 
+ <body>
+ 
+-<h1>Assignment 1. Getting to know your system</h1>
++<h1>Assignment 42. Getting to know your system</h1>
++
+ 
+-<p><small>[<a href='../index.html'>35L home</a> &gt; <a href='../assign.html'>assignments</a>]</small></p>
+ 
+ <section>
+ <h2>Laboratory: Linux and Emacs scavenger hunt</h2>
+@@ -123,6 +123,7 @@
+ and the directory listing of the Emacs <samp>dired</samp> command?
+ List any shell or Emacs commands you used to answer this question.</li>
+ </ol>
++
+ </section>
+ 
+ <section>
+@@ -426,8 +427,8 @@
+   returns</a>). The shell
+   commands:</p>
+ 
+-<pre><samp><a href='http://pubs.opengroup.org/onlinepubs/9699919799/basedefs/V1_chap07.html#tag_07_02'>LC_ALL=C</a> <a href='https://en.wikipedia.org/wiki/AWK'>awk</a> '/[^\t\f -~]/' key1.org ans1.org #</samp> <em>(if you submit .org files)</em>
+-<samp>LC_ALL=C awk '/[^\t\f -~]/' key1.txt ans1.txt #</samp> <em>(if you submit .txt files)</em>
++
++
+ </pre>
+ 
+ <p>should output nothing<!---->.</p>

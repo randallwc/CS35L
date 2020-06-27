@@ -1,0 +1,166 @@
+William Randal
+lab9.txt
+
+///// part 1 /////
+
+$ cd ~eggert/src/gnu/emacs-CS-35L
+
+I used du with the '-s' flag to show the number of bytes
+of disk usage in the current directory.
+
+$ du -s
+
+===du===
+590312	.
+===end===
+
+Then I used '.git*' to find the git related disk usages.
+
+$ du .git*
+
+===output===
+...
+424356	.git
+...
+===end===
+
+From this we can see that disk space used to represent the working files in this directory is
+590312 - 424356 = 165956 bytes.
+
+424356 bytes are used to represent the Git repository.
+
+I used sort with the '-h' flag because it would sort the human readable numbers in the output.
+
+$ du .git* | sort -h
+
+===output===
+...
+7892	.git/objects/info
+415112	.git/objects/pack
+423008	.git/objects
+424356	.git
+===end===
+
+Git objects takes up the most space in the .git directory by far with 423008 bytes.
+This is because it contains git blobs, trees, and commits.
+This contains many commits which is why it is so large.
+
+///// part 2 /////
+
+git branch will tell us the local branches to the repository
+
+$ git branch | wc -l
+
+176 branches are local to the repository
+
+the '-r' flag will show the remote branches
+
+$ git branch -r | wc -l
+
+177 branches are remote to the repository
+
+///// part 3 /////
+
+The '-v' option to git remote will tell us the url of the location
+
+$ git remote -v
+
+===output===
+origin	/u/cs/fac/eggert/src/gnu/emacs (fetch)
+origin	/u/cs/fac/eggert/src/gnu/emacs (push)
+savannah	https://git.savannah.gnu.org/git/emacs.git (fetch)
+savannah	https://git.savannah.gnu.org/git/emacs.git (push)
+===end===
+
+There is one remote repository 'savannah' and it is stored at
+https://git.savannah.gnu.org/git/emacs.git.
+
+///// part 4 /////
+
+This lists the branches in order of committer date and then only outputs the top 10
+
+$ git branch --sort=-committerdate | head -10
+
+===output===
+* master
+  scratch/joaot/make-completion-at-point-function
+  feature/windows-with-utils
+  scratch/completion-api
+  scratch/a-modest-completion-redesign-proposal
+  scratch/fido-mode
+  feature/gnus-select2
+  feature/extend_face_id
+  scratch/jit-lock-antiblink-cleaned-up
+  emacs-26
+===end===
+
+///// part 5 /////
+
+To see the number of commits on master I did
+
+$ git rev-list --count master
+
+There are 141268 on master.
+
+///// part 6 /////
+
+To get the total ammount of commits I did
+
+$ git rev-list --count --all
+
+There are 145595 commits.
+
+141268/145595 = 0.9702805728
+
+Therefore 97.02% of the commits that are in any branch, are also in the master branch.
+
+///// part 7 /////
+
+I used git shortlog with flags
+'-n' sort output according to the number of commits per author 
+'-s' suppress commit description and provide a commit count summary only
+'--since=2013'
+on master to get the people who did the most commits since 2013.
+And head -10 to get the top 10 lines
+
+$ git shortlog -sn --since=2013 master | head -10
+
+===output===
+  3700	Eli Zaretskii
+  3603	Paul Eggert
+  3343	Glenn Morris
+  1833	Lars Ingebrigtsen
+  1713	Stefan Monnier
+  1580	Michael Albinus
+   647	Dmitry Gutov
+   604	Noam Postavsky
+   530	Juri Linkov
+   487	Alan Mackenzie
+===end===
+
+This shows how many commits each made in order based on ammount of commits.
+
+///// part 8 /////
+
+I opened a new window
+
+$ ssh culver@lnxsrv06.seas.ucla.edu
+$ cd ~eggert/src/gnu/emacs-CS-35L
+$ gitk
+
+This is the tree with the first two chars of 
+each key as labels and ... as elipses and
+a '->' meaning it continues.
+
+   97------...----0c------...--------ab--...--98->
+  /               /                  /        |
+4e           -...--...-82->         /         |
+  \         /           \          /          |
+   62-...-54             00->     /           |
+            \             \      /            |
+             ->            -...-49----...----...--->
+
+0c06b93c1e467debd401eb0b3be4652fde14fa95
+abcb2e62dae6aa26308f7ac9efc89247f89cbe65
+98ac36efe4ce4bd3a0bca76fc73ce6c7abaa4371
+are merge commits.

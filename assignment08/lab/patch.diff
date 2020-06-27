@@ -1,0 +1,100 @@
+1,5c1,4
+< diff --git a/src/cmp.c b/src/cmp.c
+< index 2455dc4..e19f013 100644
+< --- a/src/cmp.c
+< +++ b/src/cmp.c
+< @@ -115,7 +115,7 @@ try_help (char const *reason_msgid, char const *operand)
+---
+> diff -pru diffutils-3.0/cmp.c diffutils-3.0-patch/cmp.c
+> --- diffutils-3.0/cmp.c	2020-06-01 23:45:59.940952000 -0700
+> +++ diffutils-3.0-patch/cmp.c	2020-06-01 23:46:43.419845000 -0700
+> @@ -115,7 +115,7 @@ try_help (char const *reason_msgid, char
+14c13
+< @@ -134,7 +134,7 @@ specify_ignore_initial (int f, char **argptr, char delimiter)
+---
+> @@ -134,7 +134,7 @@ specify_ignore_initial (int f, char **ar
+59,62c58,60
+< diff --git a/src/diff.c b/src/diff.c
+< index cc1b611..256a984 100644
+< --- a/src/diff.c
+< +++ b/src/diff.c
+---
+> diff -pru diffutils-3.0/diff.c diffutils-3.0-patch/diff.c
+> --- diffutils-3.0/diff.c	2020-06-01 23:45:59.944953000 -0700
+> +++ diffutils-3.0-patch/diff.c	2020-06-01 23:46:43.424845000 -0700
+111c109
+< @@ -826,7 +826,7 @@ try_help (char const *reason_msgid, char const *operand)
+---
+> @@ -826,7 +826,7 @@ try_help (char const *reason_msgid, char
+120c118
+< @@ -870,11 +870,11 @@ static char const * const option_help_msgid[] = {
+---
+> @@ -870,11 +870,11 @@ static char const * const option_help_ms
+134c132
+< @@ -895,7 +895,7 @@ static char const * const option_help_msgid[] = {
+---
+> @@ -895,7 +895,7 @@ static char const * const option_help_ms
+143c141
+< @@ -918,9 +918,9 @@ static char const * const option_help_msgid[] = {
+---
+> @@ -918,9 +918,9 @@ static char const * const option_help_ms
+155c153
+< @@ -960,7 +960,7 @@ specify_value (char const **var, char const *value, char const *option)
+---
+> @@ -960,7 +960,7 @@ specify_value (char const **var, char co
+164c162
+< @@ -1159,7 +1159,7 @@ compare_files (struct comparison const *parent,
+---
+> @@ -1159,7 +1159,7 @@ compare_files (struct comparison const *
+173,176c171,173
+< diff --git a/src/diff3.c b/src/diff3.c
+< index 0f11fdc..fbfb28b 100644
+< --- a/src/diff3.c
+< +++ b/src/diff3.c
+---
+> diff -pru diffutils-3.0/diff3.c diffutils-3.0-patch/diff3.c
+> --- diffutils-3.0/diff3.c	2020-06-01 23:45:59.946951000 -0700
+> +++ diffutils-3.0-patch/diff3.c	2020-06-01 23:46:43.427845000 -0700
+198c195
+< @@ -412,7 +412,7 @@ try_help (char const *reason_msgid, char const *operand)
+---
+> @@ -412,7 +412,7 @@ try_help (char const *reason_msgid, char
+207c204
+< @@ -435,7 +435,7 @@ static char const * const option_help_msgid[] = {
+---
+> @@ -435,7 +435,7 @@ static char const * const option_help_ms
+242,246c239,242
+< diff --git a/src/dir.c b/src/dir.c
+< index 5b4eaec..5e08318 100644
+< --- a/src/dir.c
+< +++ b/src/dir.c
+< @@ -154,7 +154,7 @@ compare_names (char const *name1, char const *name2)
+---
+> diff -pru diffutils-3.0/dir.c diffutils-3.0-patch/dir.c
+> --- diffutils-3.0/dir.c	2020-06-01 23:45:59.948951000 -0700
+> +++ diffutils-3.0-patch/dir.c	2020-06-01 23:46:43.429847000 -0700
+> @@ -154,7 +154,7 @@ compare_names (char const *name1, char c
+255,259c251,254
+< diff --git a/src/sdiff.c b/src/sdiff.c
+< index 4344e8d..5bbecd8 100644
+< --- a/src/sdiff.c
+< +++ b/src/sdiff.c
+< @@ -175,7 +175,7 @@ try_help (char const *reason_msgid, char const *operand)
+---
+> diff -pru diffutils-3.0/sdiff.c diffutils-3.0-patch/sdiff.c
+> --- diffutils-3.0/sdiff.c	2020-06-01 23:45:59.956953000 -0700
+> +++ diffutils-3.0-patch/sdiff.c	2020-06-01 23:46:43.440847000 -0700
+> @@ -175,7 +175,7 @@ try_help (char const *reason_msgid, char
+277c272
+< @@ -286,12 +286,12 @@ check_child_status (int werrno, int wstatus, int max_ok_status,
+---
+> @@ -286,12 +286,12 @@ check_child_status (int werrno, int wsta
+306,309c301,303
+< diff --git a/src/util.c b/src/util.c
+< index 3be03e9..d18bf38 100644
+< --- a/src/util.c
+< +++ b/src/util.c
+---
+> diff -pru diffutils-3.0/util.c diffutils-3.0-patch/util.c
+> --- diffutils-3.0/util.c	2020-06-01 23:45:59.960952000 -0700
+> +++ diffutils-3.0-patch/util.c	2020-06-01 23:46:43.444847000 -0700

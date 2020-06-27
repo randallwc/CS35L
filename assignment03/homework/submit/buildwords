@@ -1,0 +1,28 @@
+#!/usr/bin/bash
+
+#define function
+
+#remove the <u>,?,</u>
+sed -E 's/<u>|\?|<\/u>//g' | 
+
+#replace ` with ' and - with ' '
+tr "\`" "\'" |
+tr "\-" ' ' |
+
+#find all occurances of the text in the form ‘A<tdX>W</td>Z’
+#where A and Z are whitespace
+#where X is 0 or more occuances 
+grep -E "\s*<td[^>]*>['pkmnwlhaeiouPKMNWLHAEIOU ]+</td>\s*" |
+
+#remove the 'A<tdX>' and '</td>Z'
+sed -E 's/ *<td[^>]*>//g' |
+sed -E 's/<\/td> *//g' |
+
+#change ' ' to '\n'
+tr -s  ' ' "\n" |
+
+#change uppercase to lowercase
+tr '[:upper:]' '[:lower:]' |
+
+#sort the result and remove duplicates
+sort -u

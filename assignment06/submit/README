@@ -1,0 +1,86 @@
+8*1024=8,192
+8KiB
+
+gcc -o sfrobu -g sfrobu.c
+valgrind --leak-check=full ./sfrobu
+
+printf '*~BO *{_CIA *hXE]D *LER #@_GZY #E\\OX #^BO #FKPS #NEM\4' | valgrind --leak-check=full ./sfrobu | od -ta
+printf '*~BO *{_CIA *hXE]D *LER #@_GZY #E\\OX #^BO #FKPS #NEM\4 ' | valgrind --leak-check=full ./sfrobu | od -ta
+
+printf '*~BO *{_CIA *hXE]D *LER #@_GZY #E\\OX #^BO #FKPS #NEM\4' | ./sfrobu | od -ta > output/out1
+printf '*~BO *{_CIA *hXE]D *LER #@_GZY #E\\OX #^BO #FKPS #NEM\4 ' | ./sfrobu | od -ta > output/out2
+
+printf '*~BO *{_CIA *hXE]D *LER #@_GZY #E\\OX #^BO #FKPS #NEM\4' | ./sfrobu -f | od -ta > output/out3
+printf '*~BO *{_CIA *hXE]D *LER #@_GZY #E\\OX #^BO #FKPS #NEM\4 ' | ./sfrobu -f | od -ta > output/out4
+
+strace
+
+python3 grow-test.py | ./sfrobu | od -ta > out5
+
+python3 grow-test.py | valgrind --leak-check=full ./sfrobu | od -ta
+
+cat large_input.txt | ./sfrobu > out6
+diff -u output/out6 sfrob_output_FOR_large_input.txt > output/out6.diff
+
+cat large_input.txt | valgrind --leak-check=full ./sfrobu > out1
+
+////
+0000000   *   h   X   E   ]   D  sp   *   {   _   C   I   A  sp   *   ~
+0000020   B   O  sp   *   L   E   R  sp   #   N   E   M eot  sp   #   @
+0000040   _   G   Z   Y  sp   #   F   K   P   S  sp   #   E   \   O   X
+0000060  sp   #   ^   B   O  sp
+0000066
+////
+0000000   *   h   X   E   ]   D  sp   *   L   E   R  sp   *   {   _   C
+0000020   I   A  sp   *   ~   B   O  sp   #   N   E   M eot  sp   #   @
+0000040   _   G   Z   Y  sp   #   F   K   P   S  sp   #   E   \   O   X
+0000060  sp   #   ^   B   O  sp
+0000066
+////
+
+time cat 0.txt | ./sfrobu > 0
+time cat 100.txt | ./sfrobu > 1
+time cat 10000.txt | ./sfrobu > 2
+time cat 1000000.txt | ./sfrobu > 3
+
+//sfrob
+0.txt
+real	0m0.103s
+user	0m0.002s
+sys	0m0.002s
+
+100.txt
+real	0m0.113s
+user	0m0.000s
+sys	0m0.004s
+
+10000.txt
+real	0m0.061s
+user	0m0.003s
+sys	0m0.002s
+
+1000000.txt
+real	0m1.140s
+user	0m0.203s
+sys	0m0.011s
+
+//sfrobu
+0.txt
+real	0m0.101s
+user	0m0.003s
+sys	0m0.000s
+
+100.txt
+real	0m0.150s
+user	0m0.002s
+sys	0m0.002s
+
+10000.txt
+real	0m0.243s
+user	0m0.006s
+sys	0m0.026s
+
+1000000.txt
+real	0m14.404s
+user	0m0.792s
+sys	0m2.077s
