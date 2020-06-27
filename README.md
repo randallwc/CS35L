@@ -4,7 +4,7 @@ Software Construction Laboratory (Spring qtr 2020 UCLA)
 UCLA Computer Science 35L, spring 2020.
 Software Construction Laboratory
 
-Instructor in charge: Paul Eggert. Office hours are Mondays 09:30–10:30 and Thursdays 14:00–15:00. For the Zoom ID, see “Paul Eggert office hours” in the announcements for this class on CCLE.
+Instructor in charge: Paul Eggert.
 
 Prerequisite: Computer Science 31.
 
